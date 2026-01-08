@@ -37,6 +37,68 @@
         /** @type HTMLDivElement */
         const canvas = document.getElementById("canvas");
 
+        const re = /^(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:foot|f(?:ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?))$/;
+        /**
+         * Convert a string to meters.
+         * Returns `null` if invalid measurement.
+         * @param {string} s
+         * @returns {number|null}
+         */
+        const stom = (s) => {
+            let arr = re.exec(s);
+            if (arr === null) {
+                return null;
+            }
+            let feet = arr.groups["ft"];
+            let inches = arr.groups["in"];
+            let meters = arr.groups["m"];
+            let metricPrefix = arr.groups["p"];
+            if (feet !== undefined) {
+                feet = feet.replace(',',"").replace(' ',"");
+                if (inches !== undefined) {
+                    inches = inches.replace(',',"").replace(' ',"");
+                    return Number(feet) * 0.3048 + Number(inches) * 0.0254;
+                } else {
+                    return Number(feet) * 0.3048;
+                }
+            } else if (inches !== undefined) {
+                inches = inches.replace(',',"").replace(' ',"");
+                return Number(inches) * 0.0254;
+            } else if (meters !== undefined) {
+                meters = meters.replace(',',"").replace(' ',"");
+                let multiplier;
+                switch (metricPrefix) {
+                    case "quetta": case "Q": multiplier = 1e30; break;
+                    case "ronna": case "R": multiplier = 1e27; break;
+                    case "yotta": case "Y": multiplier = 1e24; break;
+                    case "zetta": case "Z": multiplier = 1e21; break;
+                    case "exa": case "E": multiplier = 1e18; break;
+                    case "peta": case "P": multiplier = 1e15; break;
+                    case "tera": case "T": multiplier = 1e12; break;
+                    case "giga": case "G": multiplier = 1e9; break;
+                    case "mega": case "M": multiplier = 1e6; break;
+                    case "kilo": case "k": multiplier = 1e3; break;
+                    case "hecto": case "h": multiplier = 1e2; break;
+                    case "deca": case "deka": case "da": multiplier = 1e1; break;
+                    case "": default: multiplier = 1e0; break;
+                    case "deci": case "d": multiplier = 1e-1; break;
+                    case "centi": case "c": multiplier = 1e-2; break;
+                    case "milli": case "m": multiplier = 1e-3; break;
+                    case "micro": case "μ": multiplier = 1e-6; break;
+                    case "nano": case "n": multiplier = 1e-9; break;
+                    case "pico": case "p": multiplier = 1e-12; break;
+                    case "femto": case "f": multiplier = 1e-15; break;
+                    case "atto": case "a": multiplier = 1e-18; break;
+                    case "zepto": case "z": multiplier = 1e-21; break;
+                    case "yocto": case "y": multiplier = 1e-24; break;
+                    case "ronto": case "r": multiplier = 1e-27; break;
+                    case "quecto": case "q": multiplier = 1e-30; break;
+                }
+                console.log(metricPrefix, ":", multiplier, "*", Number(meters));
+                return multiplier*Number(meters);
+            }
+        };
+
         characters.addEventListener('change', (e) => {
             let files = characters.files;
             if (files === null) {
@@ -65,21 +127,54 @@
 
                         const fieldset = document.createElement('fieldset');
 
+                        const topSliderLabel = document.createElement('label');
+                        topSliderLabel.htmlFor = "top-slider";
+                        topSliderLabel.textContent = "top of measurement";
+                        fieldset.appendChild(topSliderLabel);
+
                         const topSlider = document.createElement('input');
                         topSlider.type = "range";
                         topSlider.min = 0.0;
                         topSlider.max = imgHeight;
                         topSlider.value = imgHeight;
+                        topSlider.name = "top-slider";
                         fieldset.appendChild(topSlider);
+
+                        const botSliderLabel = document.createElement('label');
+                        botSliderLabel.htmlFor = "bot-slider";
+                        botSliderLabel.textContent = "bottom of measurement";
+                        fieldset.appendChild(botSliderLabel);
 
                         const botSlider = document.createElement('input');
                         botSlider.type = "range";
                         botSlider.min = 0.0;
                         botSlider.max = imgHeight;
                         botSlider.value = 0.0;
+                        topSlider.name = "bot-slider";
                         fieldset.appendChild(botSlider);
 
+                        const heightLabel = document.createElement('label');
+                        heightLabel.htmlFor = "height";
+                        heightLabel.textContent = "height";
+                        fieldset.appendChild(heightLabel);
+
+                        const heightInput = document.createElement('input');
+                        heightInput.type = "text";
+                        heightInput.min = 0;
+                        heightInput.value = `5'9"`;
+                        heightInput.name = "height";
+                        fieldset.appendChild(heightInput);
+
+                        const heightOutput = document.createElement('output');
+                        fieldset.appendChild(heightOutput);
+
                         container.appendChild(fieldset);
+
+                        const updateHeightOutput = (e) => {
+                            heightOutput.value = stom(heightInput.value) + 'm';
+                        };
+                        updateHeightOutput(null);
+                        heightInput.addEventListener('change', updateHeightOutput);
 
                         const updateHeight = (e) => {
                             botSlider.value = Math.min(botSlider.value, topSlider.value);
@@ -88,8 +183,8 @@
                             heightIndicator.style.height = `${(topSlider.value - botSlider.value)*scale}px`;
                         };
                         updateHeight(null);
-                        botSlider.addEventListener('change', updateHeight);
-                        topSlider.addEventListener('change', updateHeight);
+                        botSlider.addEventListener('input', updateHeight);
+                        topSlider.addEventListener('input', updateHeight);
                     }
                 }
             }
