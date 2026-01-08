@@ -49,7 +49,7 @@
     <div id="canvas"></div>
 
     <script>
-        const stomRe = /^(?:(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:foot|f(?:ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?)))$/;
+        const stomRe = /^(?:(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:foot|f(?:ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\")?)?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?)))$/;
         /**
          * Convert a string to meters.
          * Returns `null` if invalid measurement.
@@ -214,12 +214,6 @@
         characters.addEventListener('change', () => {
             try {
                 let files = characters.files;
-                for (const child of inputs.children) {
-                    child.remove();
-                }
-                for (const child of canvas.children) {
-                    child.remove();
-                }
                 if (files !== null) {
                     for (const file of files) {
                         const fileURL = URL.createObjectURL(file);
@@ -340,9 +334,9 @@
                             } catch (e) { console.error(e); }
                         });
                     }
+                    updateCanvas();
                 }
             } catch { console.error(e); }
-            updateCanvas();
         });
     </script>
 </body>
