@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height Comparison</title>
+    <style>
+        /* input#characters {} */
+        /* form#height-sliders {} */
+        div#canvas {
+            display: flex;
+            flex-direction: row;
+            img {
+                max-height: 500px;
+            }
+            div.height-indicator {
+                position: relative;
+                border: 1px solid red;
+            }
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="characters" accept="image/png, image/jpeg" multiple>
+    <form id="height-sliders"></form>
+    <div id="canvas"></div>
+    <script>
+        /** @type HTMLInputElement */
+        const characters = document.getElementById("characters");
+        /** @type HTMLFormElement */
+        const heightSliders = document.getElementById("height-sliders");
+        /** @type HTMLDivElement */
+        const canvas = document.getElementById("canvas");
+
+        characters.addEventListener('change', (e) => {
+            let files = characters.files;
+            if (files === null) {
+                for (const child of canvas) {
+                    child.remove();
+                }
+            } else {
+                while (canvas.childElementCount > 0) {
+                    canvas.children.item(0).remove();
+                }
+                while (heightSliders.childElementCount > 0) {
+                    heightSliders.children.item(0).remove();
+                }
+                for (let i = 0; i < files.length; ++i) {
+                    /** @type File */
+                    const file = files.item(i);
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    canvas.appendChild(img);
+                    const heightIndicator = document.createElement('div');
+                    heightIndicator.classList.add("height-indicator");
+                    canvas.appendChild(heightIndicator);
+                    img.onload = () => {
+                        const imgHeight = img.naturalHeight;
+
+                        const botSlider = document.createElement('input');
+                        botSlider.type = "range";
+                        botSlider.min = 0.0;
+                        botSlider.max = imgHeight;
+                        botSlider.value = 0.0;
+                        heightSliders.appendChild(botSlider);
+
+                        const topSlider = document.createElement('input');
+                        topSlider.type = "range";
+                        topSlider.min = 0.0;
+                        topSlider.max = imgHeight;
+                        topSlider.value = imgHeight;
+                        heightSliders.appendChild(topSlider);
+
+                        const updateHeight = (e) => {
+                            botSlider.value = Math.min(botSlider.value, topSlider.value);
+                            let scale = img.clientHeight / imgHeight;
+                            heightIndicator.style.top = `${(imgHeight - topSlider.value)*scale}px`;
+                            heightIndicator.style.height = `${(topSlider.value - botSlider.value)*scale}px`;
+                        };
+                        updateHeight(null);
+                        botSlider.addEventListener('change', updateHeight);
+                        topSlider.addEventListener('change', updateHeight);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
