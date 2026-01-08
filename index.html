@@ -6,29 +6,34 @@
     <title>Height Comparison</title>
     <style>
         /* input#characters {} */
-        /* form#height-sliders {} */
         div#canvas {
             display: flex;
             flex-direction: row;
-            img {
-                max-height: 500px;
-            }
-            div.height-indicator {
+            div.container {
                 position: relative;
-                border: 1px solid red;
+                img {
+                    max-height: 500px;
+                }
+                fieldset {
+                    display: flex;
+                    flex-direction: column;
+                }
+                div.height-indicator {
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    border: 1px solid red;
+                }
             }
         }
     </style>
 </head>
 <body>
     <input type="file" id="characters" accept="image/png, image/jpeg" multiple>
-    <form id="height-sliders"></form>
     <div id="canvas"></div>
     <script>
         /** @type HTMLInputElement */
         const characters = document.getElementById("characters");
-        /** @type HTMLFormElement */
-        const heightSliders = document.getElementById("height-sliders");
         /** @type HTMLDivElement */
         const canvas = document.getElementById("canvas");
 
@@ -42,34 +47,39 @@
                 while (canvas.childElementCount > 0) {
                     canvas.children.item(0).remove();
                 }
-                while (heightSliders.childElementCount > 0) {
-                    heightSliders.children.item(0).remove();
-                }
-                for (let i = 0; i < files.length; ++i) {
-                    /** @type File */
-                    const file = files.item(i);
+                for (const file of files) {
+                    const container = document.createElement('div');
+                    container.classList.add("container");
+                    canvas.appendChild(container);
+
                     const img = document.createElement('img');
                     img.src = URL.createObjectURL(file);
-                    canvas.appendChild(img);
+                    container.appendChild(img);
+
                     const heightIndicator = document.createElement('div');
                     heightIndicator.classList.add("height-indicator");
-                    canvas.appendChild(heightIndicator);
+                    container.appendChild(heightIndicator);
+
                     img.onload = () => {
                         const imgHeight = img.naturalHeight;
 
-                        const botSlider = document.createElement('input');
-                        botSlider.type = "range";
-                        botSlider.min = 0.0;
-                        botSlider.max = imgHeight;
-                        botSlider.value = 0.0;
-                        heightSliders.appendChild(botSlider);
+                        const fieldset = document.createElement('fieldset');
 
                         const topSlider = document.createElement('input');
                         topSlider.type = "range";
                         topSlider.min = 0.0;
                         topSlider.max = imgHeight;
                         topSlider.value = imgHeight;
-                        heightSliders.appendChild(topSlider);
+                        fieldset.appendChild(topSlider);
+
+                        const botSlider = document.createElement('input');
+                        botSlider.type = "range";
+                        botSlider.min = 0.0;
+                        botSlider.max = imgHeight;
+                        botSlider.value = 0.0;
+                        fieldset.appendChild(botSlider);
+
+                        container.appendChild(fieldset);
 
                         const updateHeight = (e) => {
                             botSlider.value = Math.min(botSlider.value, topSlider.value);
