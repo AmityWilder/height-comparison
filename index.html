@@ -6,7 +6,7 @@
     <title>Height Comparison</title>
     <style>
         /* input#characters {} */
-        div#canvas {
+        div#inputs {
             display: flex;
             flex-direction: row;
             div.container {
@@ -17,6 +17,9 @@
                 fieldset {
                     display: flex;
                     flex-direction: column;
+                    output::after {
+                        content: 'm';
+                    }
                 }
                 div.height-indicator {
                     position: absolute;
@@ -26,18 +29,27 @@
                 }
             }
         }
+        div#canvas {
+            pointer-events: none;
+            position: relative;
+            z-index: -1;
+            border-bottom: 3px solid gray;
+            img {
+                position: absolute;
+            }
+        }
     </style>
 </head>
 <body>
-    <input type="file" id="characters" accept="image/png, image/jpeg" multiple>
+    <label for="scale">output height</label>
+    <input type="number" id="scale" min="0" value="1024" step="1" name="scale">
+    <label for="characters">characters</label>
+    <input type="file" id="characters" name="characters" accept="image/png, image/jpeg" multiple>
+    <div id="inputs"></div>
     <div id="canvas"></div>
-    <script>
-        /** @type HTMLInputElement */
-        const characters = document.getElementById("characters");
-        /** @type HTMLDivElement */
-        const canvas = document.getElementById("canvas");
 
-        const re = /^(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:foot|f(?:ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?))$/;
+    <script>
+        const stomRe = /^(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:foot|f(?:ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?))$/;
         /**
          * Convert a string to meters.
          * Returns `null` if invalid measurement.
@@ -45,7 +57,7 @@
          * @returns {number|null}
          */
         const stom = (s) => {
-            let arr = re.exec(s);
+            let arr = stomRe.exec(s);
             if (arr === null) {
                 return null;
             }
@@ -94,100 +106,243 @@
                     case "ronto": case "r": multiplier = 1e-27; break;
                     case "quecto": case "q": multiplier = 1e-30; break;
                 }
-                console.log(metricPrefix, ":", multiplier, "*", Number(meters));
                 return multiplier*Number(meters);
             }
         };
 
-        characters.addEventListener('change', (e) => {
-            let files = characters.files;
-            if (files === null) {
-                for (const child of canvas) {
+        /** @type HTMLInputElement */
+        const characters = document.getElementById("characters");
+        /** @type HTMLInputElement */
+        const scaleInput = document.getElementById("scale");
+        /** @type HTMLDivElement */
+        const inputs = document.getElementById("inputs");
+        /** @type HTMLDivElement */
+        const canvas = document.getElementById("canvas");
+
+        const updateCanvas = () => {
+            try {
+                const heights = Array.from(document.getElementsByClassName("height-output")).map(el => Number(el.value));
+                console.log("heights:", heights);
+                if (heights.length === 0) { return; }
+                const tallest = Math.max(...heights);
+                console.log("canvas height (m):", tallest);
+                const outHeight = Number(scaleInput.value);
+                console.log("canvas height (px):", outHeight);
+                canvas.style.height = outHeight + 'px';
+                canvas.style.marginBlock = outHeight * 0.25 + 'px';
+
+                const scale = outHeight/tallest;
+                console.log("scale (px/m):", scale);
+                for (let i = 0; i < canvas.childElementCount; ++i) {
+                    console.group(`character ${i}`);
+
+                    /** @type HTMLDivElement */
+                    const input = inputs.children.item(i);
+                    // console.log(input);
+
+                    /** @type HTMLImageElement */
+                    const cimg = canvas.children.item(i);
+                    // console.log(cimg);
+
+                    const naturalHeight = cimg.naturalHeight;
+                    console.log("full height (char px):", naturalHeight);
+
+                    const topSliders = input.getElementsByClassName("top-slider");
+                    // console.log(topSliders);
+                    const topSlider = input.getElementsByClassName("top-slider").item(0);
+                    // console.log(topSlider);
+                    const topNaturalPx = Number(topSlider.value);
+                    console.log("measurement top (char px):", topNaturalPx);
+
+                    const botSliders = input.getElementsByClassName("bot-slider");
+                    // console.log(botSliders);
+                    const botSlider = botSliders.item(0);
+                    // console.log(botSlider);
+                    const botNaturalPx = Number(botSlider.value);
+                    console.log("measurement bottom (char px):", botNaturalPx);
+
+                    const shiftSliders = input.getElementsByClassName("shift-slider");
+                    // console.log(shiftSliders);
+                    const shiftSlider = shiftSliders.item(0);
+                    // console.log(shiftSlider);
+                    const shiftPx = Number(shiftSlider.value);
+                    console.log("shift (px):", shiftPx);
+
+                    const orderSliders = input.getElementsByClassName("order-slider");
+                    // console.log(orderSliders);
+                    const orderSlider = orderSliders.item(0);
+                    // console.log(orderSlider);
+                    const order = Number(orderSlider.value);
+                    console.log("order:", order);
+
+                    const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
+                    console.log("measurement height (char px):", measurementHeightNaturalPx);
+
+                    const heightOutputs = input.getElementsByClassName("height-output");
+                    // console.log(heightOutputs);
+                    const heightOutput = heightOutputs.item(0);
+                    // console.log(heightOutput);
+                    const measurementHeightMeters = Number(heightOutput.value);
+                    console.log("measurement height (m):", measurementHeightMeters);
+
+                    const localScale = measurementHeightMeters/measurementHeightNaturalPx;
+                    console.log("character scale (m/char px)", localScale);
+
+                    const conversion = scale*localScale;
+                    console.log("conversion (px/char px)", conversion);
+
+                    const fullHeightCanvas = naturalHeight*conversion;
+                    console.log("full height (px)", fullHeightCanvas);
+
+                    const botOffset = -botNaturalPx*conversion;
+                    console.log("bottom offset (px)", botOffset);
+
+                    console.groupEnd();
+
+                    cimg.style.height = fullHeightCanvas + 'px';
+                    cimg.style.bottom = botOffset + 'px';
+                    cimg.style.left = shiftPx + 'px';
+                    cimg.style.zIndex = -1 - order;
+                }
+            } catch (e) { console.error(e); }
+        };
+        scaleInput.addEventListener('change', () => {
+            canvas.style.height = scaleInput.value + 'px';
+        })
+        scaleInput.addEventListener('change', updateCanvas);
+
+        characters.addEventListener('change', () => {
+            try {
+                let files = characters.files;
+                for (const child of inputs.children) {
                     child.remove();
                 }
-            } else {
-                while (canvas.childElementCount > 0) {
-                    canvas.children.item(0).remove();
+                for (const child of canvas.children) {
+                    child.remove();
                 }
-                for (const file of files) {
-                    const container = document.createElement('div');
-                    container.classList.add("container");
-                    canvas.appendChild(container);
+                if (files !== null) {
+                    for (const file of files) {
+                        const fileURL = URL.createObjectURL(file);
 
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    container.appendChild(img);
+                        const container = document.createElement('div');
+                        container.classList.add("container");
+                        inputs.appendChild(container);
 
-                    const heightIndicator = document.createElement('div');
-                    heightIndicator.classList.add("height-indicator");
-                    container.appendChild(heightIndicator);
+                        const img = document.createElement('img');
+                        img.src = fileURL;
+                        container.appendChild(img);
 
-                    img.onload = () => {
-                        const imgHeight = img.naturalHeight;
+                        const cimg = document.createElement('img');
+                        cimg.src = fileURL;
+                        canvas.appendChild(cimg);
 
-                        const fieldset = document.createElement('fieldset');
+                        const heightIndicator = document.createElement('div');
+                        heightIndicator.classList.add("height-indicator");
+                        container.appendChild(heightIndicator);
 
-                        const topSliderLabel = document.createElement('label');
-                        topSliderLabel.htmlFor = "top-slider";
-                        topSliderLabel.textContent = "top of measurement";
-                        fieldset.appendChild(topSliderLabel);
+                        img.addEventListener('load', () => {
+                            try {
+                                const imgHeight = img.naturalHeight;
+                                const imgWidth = img.naturalWidth;
 
-                        const topSlider = document.createElement('input');
-                        topSlider.type = "range";
-                        topSlider.min = 0.0;
-                        topSlider.max = imgHeight;
-                        topSlider.value = imgHeight;
-                        topSlider.name = "top-slider";
-                        fieldset.appendChild(topSlider);
+                                const fieldset = document.createElement('fieldset');
 
-                        const botSliderLabel = document.createElement('label');
-                        botSliderLabel.htmlFor = "bot-slider";
-                        botSliderLabel.textContent = "bottom of measurement";
-                        fieldset.appendChild(botSliderLabel);
+                                const topSliderLabel = document.createElement('label');
+                                topSliderLabel.htmlFor = "top-slider";
+                                topSliderLabel.textContent = "top of measurement";
+                                fieldset.appendChild(topSliderLabel);
 
-                        const botSlider = document.createElement('input');
-                        botSlider.type = "range";
-                        botSlider.min = 0.0;
-                        botSlider.max = imgHeight;
-                        botSlider.value = 0.0;
-                        topSlider.name = "bot-slider";
-                        fieldset.appendChild(botSlider);
+                                const topSlider = document.createElement('input');
+                                topSlider.type = "range";
+                                topSlider.min = 0.0;
+                                topSlider.max = imgHeight;
+                                topSlider.value = imgHeight;
+                                topSlider.name = "top-slider";
+                                topSlider.classList.add("top-slider");
+                                fieldset.appendChild(topSlider);
 
-                        const heightLabel = document.createElement('label');
-                        heightLabel.htmlFor = "height";
-                        heightLabel.textContent = "height";
-                        fieldset.appendChild(heightLabel);
+                                const botSliderLabel = document.createElement('label');
+                                botSliderLabel.htmlFor = "bot-slider";
+                                botSliderLabel.textContent = "bottom of measurement";
+                                fieldset.appendChild(botSliderLabel);
 
-                        const heightInput = document.createElement('input');
-                        heightInput.type = "text";
-                        heightInput.min = 0;
-                        heightInput.value = `5'9"`;
-                        heightInput.name = "height";
-                        fieldset.appendChild(heightInput);
+                                const botSlider = document.createElement('input');
+                                botSlider.type = "range";
+                                botSlider.min = 0.0;
+                                botSlider.max = imgHeight;
+                                botSlider.value = 0.0;
+                                botSlider.name = "bot-slider";
+                                botSlider.classList.add("bot-slider");
+                                fieldset.appendChild(botSlider);
 
-                        const heightOutput = document.createElement('output');
-                        fieldset.appendChild(heightOutput);
+                                const shiftSliderLabel = document.createElement('label');
+                                shiftSliderLabel.htmlFor = "shift-slider";
+                                shiftSliderLabel.textContent = "horizontal offset";
+                                fieldset.appendChild(shiftSliderLabel);
 
-                        container.appendChild(fieldset);
+                                const shiftSlider = document.createElement('input');
+                                shiftSlider.type = "number";
+                                shiftSlider.value = 0;
+                                shiftSlider.name = "shift-slider";
+                                shiftSlider.classList.add("shift-slider");
+                                fieldset.appendChild(shiftSlider);
 
-                        const updateHeightOutput = (e) => {
-                            heightOutput.value = stom(heightInput.value) + 'm';
-                        };
-                        updateHeightOutput(null);
-                        heightInput.addEventListener('change', updateHeightOutput);
+                                const orderSliderLabel = document.createElement('label');
+                                orderSliderLabel.htmlFor = "order-slider";
+                                orderSliderLabel.textContent = "order (0 = front)";
+                                fieldset.appendChild(orderSliderLabel);
 
-                        const updateHeight = (e) => {
-                            botSlider.value = Math.min(botSlider.value, topSlider.value);
-                            let scale = img.clientHeight / imgHeight;
-                            heightIndicator.style.top = `${(imgHeight - topSlider.value)*scale}px`;
-                            heightIndicator.style.height = `${(topSlider.value - botSlider.value)*scale}px`;
-                        };
-                        updateHeight(null);
-                        botSlider.addEventListener('input', updateHeight);
-                        topSlider.addEventListener('input', updateHeight);
+                                const orderSlider = document.createElement('input');
+                                orderSlider.type = "number";
+                                orderSlider.value = 0;
+                                orderSlider.name = "order-slider";
+                                orderSlider.classList.add("order-slider");
+                                fieldset.appendChild(orderSlider);
+
+                                const heightLabel = document.createElement('label');
+                                heightLabel.htmlFor = "height";
+                                heightLabel.textContent = "height";
+                                fieldset.appendChild(heightLabel);
+
+                                const heightInput = document.createElement('input');
+                                heightInput.type = "text";
+                                heightInput.min = 0;
+                                heightInput.value = `5'9"`;
+                                heightInput.name = "height";
+                                fieldset.appendChild(heightInput);
+
+                                const heightOutput = document.createElement('output');
+                                heightOutput.type = "number";
+                                heightOutput.classList.add("height-output");
+                                fieldset.appendChild(heightOutput);
+
+                                container.appendChild(fieldset);
+
+                                const updateHeightOutput = () => {
+                                    heightOutput.value = stom(heightInput.value);
+                                };
+                                updateHeightOutput();
+                                heightInput.addEventListener('change', updateHeightOutput);
+
+                                const updateHeightIndicator = () => {
+                                    try {
+                                        botSlider.value = Math.min(botSlider.value, topSlider.value);
+                                        let scale = img.clientHeight/imgHeight;
+                                        heightIndicator.style.top = `${(imgHeight - topSlider.value)*scale}px`;
+                                        heightIndicator.style.height = `${(topSlider.value - botSlider.value)*scale}px`;
+                                    } catch (e) { console.error(e); }
+                                };
+                                updateHeightIndicator();
+                                botSlider.addEventListener('input', updateHeightIndicator);
+                                topSlider.addEventListener('input', updateHeightIndicator);
+
+                                fieldset.addEventListener('change', updateCanvas);
+                            } catch (e) { console.error(e); }
+                        });
                     }
                 }
-            }
+            } catch { console.error(e); }
+            updateCanvas();
         });
     </script>
 </body>
