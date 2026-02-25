@@ -46,7 +46,7 @@
     <label for="scale">output height</label>
     <input type="number" id="scale" min="0" value="1024" step="1" name="scale">
     <label for="characters">characters (reuse to add more)</label>
-    <input type="file" id="characters" name="characters" accept="image/png, image/jpeg" multiple>
+    <input type="file" id="characters" name="characters" accept="image/*" multiple>
     <div id="inputs"></div>
     <div id="canvas"></div>
 
@@ -130,19 +130,19 @@
         const updateCanvas = () => {
             try {
                 const heights = Array.from(document.getElementsByClassName("height-output")).map(el => Number(el.value));
-                console.log("heights:", heights);
+                // console.log("heights:", heights);
                 if (heights.length === 0) { return; }
                 const tallest = Math.max(...heights);
-                console.log("canvas height (m):", tallest);
+                // console.log("canvas height (m):", tallest);
                 const outHeight = Number(scaleInput.value);
-                console.log("canvas height (px):", outHeight);
+                // console.log("canvas height (px):", outHeight);
                 canvas.style.height = outHeight + 'px';
                 canvas.style.marginBlock = outHeight * 0.25 + 'px';
 
                 const scale = outHeight/tallest;
-                console.log("scale (px/m):", scale);
+                // console.log("scale (px/m):", scale);
                 for (let i = 0; i < canvas.childElementCount; ++i) {
-                    console.group(`character ${i}`);
+                    // console.group(`character ${i}`);
 
                     /** @type HTMLDivElement */
                     const input = inputs.children.item(i);
@@ -153,59 +153,59 @@
                     // console.log(cimg);
 
                     const naturalHeight = cimg.naturalHeight;
-                    console.log("full height (char px):", naturalHeight);
+                    // console.log("full height (char px):", naturalHeight);
 
                     const topSliders = input.getElementsByClassName("top-slider");
                     // console.log(topSliders);
                     const topSlider = input.getElementsByClassName("top-slider").item(0);
                     // console.log(topSlider);
                     const topNaturalPx = Number(topSlider.value);
-                    console.log("measurement top (char px):", topNaturalPx);
+                    // console.log("measurement top (char px):", topNaturalPx);
 
                     const botSliders = input.getElementsByClassName("bot-slider");
                     // console.log(botSliders);
                     const botSlider = botSliders.item(0);
                     // console.log(botSlider);
                     const botNaturalPx = Number(botSlider.value);
-                    console.log("measurement bottom (char px):", botNaturalPx);
+                    // console.log("measurement bottom (char px):", botNaturalPx);
 
                     const shiftSliders = input.getElementsByClassName("shift-slider");
                     // console.log(shiftSliders);
                     const shiftSlider = shiftSliders.item(0);
                     // console.log(shiftSlider);
                     const shiftPx = Number(shiftSlider.value);
-                    console.log("shift (px):", shiftPx);
+                    // console.log("shift (px):", shiftPx);
 
                     const orderSliders = input.getElementsByClassName("order-slider");
                     // console.log(orderSliders);
                     const orderSlider = orderSliders.item(0);
                     // console.log(orderSlider);
                     const order = Number(orderSlider.value);
-                    console.log("order:", order);
+                    // console.log("order:", order);
 
                     const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
-                    console.log("measurement height (char px):", measurementHeightNaturalPx);
+                    // console.log("measurement height (char px):", measurementHeightNaturalPx);
 
                     const heightOutputs = input.getElementsByClassName("height-output");
                     // console.log(heightOutputs);
                     const heightOutput = heightOutputs.item(0);
                     // console.log(heightOutput);
                     const measurementHeightMeters = Number(heightOutput.value);
-                    console.log("measurement height (m):", measurementHeightMeters);
+                    // console.log("measurement height (m):", measurementHeightMeters);
 
                     const localScale = measurementHeightMeters/measurementHeightNaturalPx;
-                    console.log("character scale (m/char px)", localScale);
+                    // console.log("character scale (m/char px)", localScale);
 
                     const conversion = scale*localScale;
-                    console.log("conversion (px/char px)", conversion);
+                    // console.log("conversion (px/char px)", conversion);
 
                     const fullHeightCanvas = naturalHeight*conversion;
-                    console.log("full height (px)", fullHeightCanvas);
+                    // console.log("full height (px)", fullHeightCanvas);
 
                     const botOffset = -botNaturalPx*conversion;
-                    console.log("bottom offset (px)", botOffset);
+                    // console.log("bottom offset (px)", botOffset);
 
-                    console.groupEnd();
+                    // console.groupEnd();
 
                     cimg.style.height = fullHeightCanvas + 'px';
                     cimg.style.bottom = botOffset + 'px';
