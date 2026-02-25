@@ -200,6 +200,8 @@
                     return 1609 * Number(miles);
                 } else if (lightyears !== undefined) {
                     return 9_460_730_472_580_800 * Number(lightyears);
+                } else {
+                    return null;
                 }
             };
 
@@ -227,6 +229,7 @@
                     canvas.style.marginBlock = outHeight * 0.25 + 'px';
 
                     const scale = outHeight / tallest;
+                    let canvasWidth = 0.0;
                     // console.log("scale (px/m):", scale);
                     for (let i = 0; i < canvas.childElementCount; ++i) {
                         // console.group(`character ${i}`);
@@ -244,7 +247,7 @@
 
                         const topSliders = input.getElementsByClassName('top-slider');
                         // console.log(topSliders);
-                        const topSlider = input.getElementsByClassName('top-slider').item(0);
+                        const topSlider = topSliders.item(0);
                         // console.log(topSlider);
                         const topNaturalPx = Number(topSlider.value);
                         // console.log("measurement top (char px):", topNaturalPx);
@@ -255,13 +258,6 @@
                         // console.log(botSlider);
                         const botNaturalPx = Number(botSlider.value);
                         // console.log("measurement bottom (char px):", botNaturalPx);
-
-                        const shiftSliders = input.getElementsByClassName('shift-slider');
-                        // console.log(shiftSliders);
-                        const shiftSlider = shiftSliders.item(0);
-                        // console.log(shiftSlider);
-                        const shiftPx = Number(shiftSlider.value);
-                        // console.log("shift (px):", shiftPx);
 
                         const orderSliders = input.getElementsByClassName('order-slider');
                         // console.log(orderSliders);
@@ -296,8 +292,27 @@
 
                         cimg.style.height = fullHeightCanvas + 'px';
                         cimg.style.bottom = botOffset + 'px';
-                        cimg.style.left = shiftPx + 'px';
                         cimg.style.zIndex = -1 - order;
+                        canvasWidth += cimg.clientWidth;
+                    }
+                    for (let i = 0; i < canvas.childElementCount; ++i) {
+                        /** @type HTMLDivElement */
+                        const input = inputs.children.item(i);
+
+                        /** @type HTMLImageElement */
+                        const cimg = canvas.children.item(i);
+                        // console.log(cimg);
+
+                        const shiftSliders = input.getElementsByClassName('shift-slider');
+                        // console.log(shiftSliders);
+                        const shiftSlider = shiftSliders.item(0);
+                        // console.log(shiftSlider);
+                        const shiftPx = Number(shiftSlider.value);
+                        // console.log("shift (px):", shiftPx);
+
+                        shiftSlider.max = canvasWidth - cimg.clientWidth;
+
+                        cimg.style.left = shiftPx + 'px';
                     }
                 } catch (e) {
                     console.error(e);
@@ -398,8 +413,10 @@
                                     fieldset.appendChild(shiftSliderLabel);
 
                                     const shiftSlider = document.createElement('input');
-                                    shiftSlider.type = 'number';
-                                    shiftSlider.value = 0;
+                                    shiftSlider.type = 'range';
+                                    shiftSlider.min = 0.0;
+                                    shiftSlider.value = 0.0;
+                                    shiftSlider.max = 0.0;
                                     shiftSlider.name = 'shift-slider';
                                     shiftSlider.classList.add('shift-slider');
                                     fieldset.appendChild(shiftSlider);
@@ -436,10 +453,13 @@
                                     container.appendChild(fieldset);
 
                                     const updateHeightOutput = () => {
-                                        heightOutput.value = stom(heightInput.value);
+                                        let newHeight = stom(heightInput.value);
+                                        if (newHeight !== null) {
+                                            heightOutput.value = newHeight;
+                                        }
                                     };
                                     updateHeightOutput();
-                                    heightInput.addEventListener('change', updateHeightOutput);
+                                    heightInput.addEventListener('input', updateHeightOutput);
 
                                     const updateHeightIndicator = () => {
                                         try {
@@ -469,13 +489,13 @@
                                     };
                                     topEx.addEventListener('change', updateTopEx);
 
-                                    fieldset.addEventListener('change', updateCanvas);
+                                    fieldset.addEventListener('input', updateCanvas);
                                 } catch (e) {
                                     console.error(e);
                                 }
+                                updateCanvas();
                             });
                         }
-                        updateCanvas();
                     }
                 } catch {
                     console.error(e);
