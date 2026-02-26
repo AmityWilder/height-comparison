@@ -160,7 +160,6 @@
                             multiplier = 1e1;
                             break;
                         case '':
-                        default:
                             multiplier = 1;
                             break;
                         case 'deci':
@@ -211,6 +210,8 @@
                         case 'q':
                             multiplier = 1e-30;
                             break;
+                        default: // what is a "michaelmeter"?
+                            return null;
                     }
                     return multiplier * Number(meters);
                 } else if (miles !== undefined) {
