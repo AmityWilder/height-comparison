@@ -261,9 +261,9 @@
 
                     let canvasWidthM = 0.0;
                     /**
-                     * Uses last scale for group (average would require qty)
+                     * Uses last scale for group
                      * Keyed by group number
-                     * @type {{[key: number]: number}}
+                     * @type {{[key: number]: number[]}}
                      */
                     const unknownLocalScales = {};
                     // knowns
@@ -333,7 +333,11 @@
                         const localScale = measurementHeightMeters / measurementHeightNaturalPx;
                         // console.log("character scale (m/char px)", localScale);
 
-                        unknownLocalScales[pxGroupId] = localScale;
+                        if (unknownLocalScales[pxGroupId] === undefined) {
+                            unknownLocalScales[pxGroupId] = [localScale];
+                        } else {
+                            unknownLocalScales[pxGroupId].push(localScale);
+                        }
 
                         const fullHeightM = naturalHeight * localScale;
                         // console.log("full height (m)", fullHeightM);
@@ -384,12 +388,15 @@
                         const pxGroupId = pxGroup.value;
                         // console.log("pixel group ID", pxGroupId);
 
-                        /** @type {number|undefined} */
-                        let localScale = unknownLocalScales[pxGroupId];
+                        /** @type {number[]|undefined} */
+                        const localScales = unknownLocalScales[pxGroupId];
                         // console.log("character scale (m/char px)", localScale);
-                        if (localScale === undefined) {
+                        let localScale;
+                        if (localScales === undefined) {
                             console.warn(`no known size for pixel group ${pxGroupId}`);
                             localScale = 1.0;
+                        } else {
+                            localScale = localScales.reduce((p, c) => p + c) / localScales.length;
                         }
                         // console.log("character scale (m/char px)", localScale);
 
