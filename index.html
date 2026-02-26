@@ -42,6 +42,7 @@
                 border-bottom: 3px solid gray;
                 img {
                     position: absolute;
+                    image-rendering: pixelated;
                 }
                 table#meterstick {
                     pointer-events: none;
@@ -83,9 +84,12 @@
              * Convert a string to meters.
              * Returns `null` if invalid measurement.
              * @param {string} s
-             * @returns {number|null}
+             * @returns {number|"px"|null}
              */
             const stom = (s) => {
+                if (s === "px") {
+                    return "px";
+                }
                 let arr = stomRe.exec(s);
                 if (arr === null) {
                     return null;
@@ -224,15 +228,15 @@
                 }
             };
 
-            /** @type HTMLInputElement */
+            /** @type {HTMLInputElement} */
             const characters = document.getElementById('characters');
-            /** @type HTMLInputElement */
+            /** @type {HTMLInputElement} */
             const scaleInput = document.getElementById('scale');
-            /** @type HTMLDivElement */
+            /** @type {HTMLDivElement} */
             const inputs = document.getElementById('inputs');
-            /** @type HTMLDivElement */
+            /** @type {HTMLDivElement} */
             const canvas = document.getElementById('canvas');
-            /** @type HTMLTableElement */
+            /** @type {HTMLTableElement} */
             const meterstick = document.getElementById('meterstick');
 
             let prevTallest = 0;
@@ -246,24 +250,60 @@
                     }
                     // from bottom of measurement to top of canvas image
 
-                    /** @type number[] */
-                    const heightsM = Array();
+                    /** @type {number[]} */
+                    const heightsM = Array(inputContainers.length);
 
-                    /** @type number[] */
-                    const botOffsetsM = Array();
+                    /** @type {number[]} */
+                    const botOffsetsM = Array(inputContainers.length);
 
-                    /** @type number[] */
-                    const fullHeightsM = Array();
+                    /** @type {number[]} */
+                    const fullHeightsM = Array(inputContainers.length);
 
                     let canvasWidthM = 0.0;
+                    /**
+                     * Uses last scale for group (average would require qty)
+                     * Keyed by group number
+                     * @type {{[key: number]: number}}
+                     */
+                    const unknownLocalScales = {};
+                    // knowns
                     for (let i = 0; i < inputContainers.length; ++i) {
                         // console.group(`character ${i}`);
 
-                        /** @type HTMLDivElement */
+                        /** @type {HTMLDivElement} */
                         const input = inputContainers.item(i);
                         // console.log(input);
 
-                        /** @type HTMLImageElement */
+                        const heightInputs = input.getElementsByClassName('height-input');
+                        // console.log(heightInputs);
+                        const heightInput = heightInputs.item(0);
+                        // console.log(heightInput);
+                        if (heightInput.value === "px") {
+                            // console.groupEnd();
+                            continue;
+                        }
+
+                        const heightOutputs = input.getElementsByClassName('height-output');
+                        // console.log(heightOutputs);
+                        const heightOutput = heightOutputs.item(0);
+                        // console.log(heightOutput);
+                        if (heightOutput.value === "?") {
+                            console.warn("height output should not be '?' if height input is not 'px'");
+                            // console.groupEnd();
+                            continue;
+                        }
+                        const measurementHeightMeters = Number(heightOutput.value);
+                        // console.log("measurement height (m):", measurementHeightMeters);
+
+                        const pxGroups = input.getElementsByClassName('px-group');
+                        // console.log(pxGroups);
+                        const pxGroup = pxGroups.item(0);
+                        // console.log(pxGroup);
+                        /** @type {number} */
+                        const pxGroupId = pxGroup.value;
+                        // console.log("pixel group ID", pxGroupId);
+
+                        /** @type {HTMLImageElement} */
                         const cimg = canvasItems.item(i);
                         // console.log(cimg);
 
@@ -290,27 +330,112 @@
                         const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
                         // console.log("measurement height (char px):", measurementHeightNaturalPx);
 
+                        const localScale = measurementHeightMeters / measurementHeightNaturalPx;
+                        // console.log("character scale (m/char px)", localScale);
+
+                        unknownLocalScales[pxGroupId] = localScale;
+
+                        const fullHeightM = naturalHeight * localScale;
+                        // console.log("full height (m)", fullHeightM);
+                        fullHeightsM[i] = fullHeightM;
+
+                        const botOffset = -botNaturalPx * localScale;
+                        // console.log("bottom offset (m)", botOffset);
+                        botOffsetsM[i] = botOffset;
+
+                        const heightToTopM = fullHeightM + botOffset;
+                        // console.log("floor to cimg top (m)", heightToTopM);
+                        heightsM[i] = heightToTopM;
+
+                        const fullWidthM = naturalWidth * localScale;
+                        canvasWidthM += fullWidthM;
+
+                        // console.groupEnd();
+                    }
+                    // unknowns
+                    for (let i = 0; i < inputContainers.length; ++i) {
+                        // console.group(`character ${i}`);
+
+                        /** @type {HTMLDivElement} */
+                        const input = inputContainers.item(i);
+                        // console.log(input);
+
+                        const heightInputs = input.getElementsByClassName('height-input');
+                        // console.log(heightInputs);
+                        const heightInput = heightInputs.item(0);
+                        // console.log(heightInput);
+                        // console.log(heightInput.value);
+                        if (heightInput.value !== "px") {
+                            // console.groupEnd();
+                            continue;
+                        }
+
+                        // heightOutput might not be "?" if it was assigned previous update
                         const heightOutputs = input.getElementsByClassName('height-output');
                         // console.log(heightOutputs);
                         const heightOutput = heightOutputs.item(0);
                         // console.log(heightOutput);
-                        const measurementHeightMeters = Number(heightOutput.value);
-                        // console.log("measurement height (m):", measurementHeightMeters);
 
-                        const localScale = measurementHeightMeters / measurementHeightNaturalPx;
+                        const pxGroups = input.getElementsByClassName('px-group');
+                        // console.log(pxGroups);
+                        const pxGroup = pxGroups.item(0);
+                        // console.log(pxGroup);
+                        /** @type {number} */
+                        const pxGroupId = pxGroup.value;
+                        // console.log("pixel group ID", pxGroupId);
+
+                        /** @type {number|undefined} */
+                        let localScale = unknownLocalScales[pxGroupId];
                         // console.log("character scale (m/char px)", localScale);
+                        if (localScale === undefined) {
+                            console.warn(`no known size for pixel group ${pxGroupId}`);
+                            localScale = 1.0;
+                        }
+                        // console.log("character scale (m/char px)", localScale);
+
+                        /** @type {HTMLImageElement} */
+                        const cimg = canvasItems.item(i);
+                        // console.log(cimg);
+
+                        const naturalHeight = cimg.naturalHeight;
+                        // console.log("full height (char px):", naturalHeight);
+
+                        const naturalWidth = cimg.naturalWidth;
+                        // console.log("full width (char px):", naturalWidth);
+
+                        const topSliders = input.getElementsByClassName('top-slider');
+                        // console.log(topSliders);
+                        const topSlider = topSliders.item(0);
+                        // console.log(topSlider);
+                        const topNaturalPx = Number(topSlider.value);
+                        // console.log("measurement top (char px):", topNaturalPx);
+
+                        const botSliders = input.getElementsByClassName('bot-slider');
+                        // console.log(botSliders);
+                        const botSlider = botSliders.item(0);
+                        // console.log(botSlider);
+                        const botNaturalPx = Number(botSlider.value);
+                        // console.log("measurement bottom (char px):", botNaturalPx);
+
+                        const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
+                        // console.log("measurement height (char px):", measurementHeightNaturalPx);
+
+                        const measurementHeightMeters = localScale * measurementHeightNaturalPx;
+                        // console.log("character scale (m/char px)", localScale);
+
+                        heightOutput.value = measurementHeightMeters;
 
                         const fullHeightM = naturalHeight * localScale;
                         // console.log("full height (m)", fullHeightM);
-                        fullHeightsM.push(fullHeightM);
+                        fullHeightsM[i] = fullHeightM;
 
                         const botOffset = -botNaturalPx * localScale;
                         // console.log("bottom offset (m)", botOffset);
-                        botOffsetsM.push(botOffset);
+                        botOffsetsM[i] = botOffset;
 
                         const heightToTopM = fullHeightM + botOffset;
                         // console.log("floor to cimg top (m)", heightToTopM);
-                        heightsM.push(heightToTopM);
+                        heightsM[i] = heightToTopM;
 
                         const fullWidthM = naturalWidth * localScale;
                         canvasWidthM += fullWidthM;
@@ -368,11 +493,11 @@
                     for (let i = 0; i < inputContainers.length; ++i) {
                         // console.group(`character ${i}`);
 
-                        /** @type HTMLDivElement */
+                        /** @type {HTMLDivElement} */
                         const input = inputContainers.item(i);
                         // console.log(input);
 
-                        /** @type HTMLImageElement */
+                        /** @type {HTMLImageElement} */
                         const cimg = canvasItems.item(i);
                         // console.log(cimg);
 
@@ -542,7 +667,21 @@
                                     heightInput.min = 0;
                                     heightInput.value = `5'9"`;
                                     heightInput.name = 'height';
+                                    heightInput.classList.add('height-input');
                                     fieldset.appendChild(heightInput);
+
+                                    const pxGroupLabel = document.createElement('label');
+                                    pxGroupLabel.htmlFor = 'px-group';
+                                    pxGroupLabel.textContent = 'pixel group';
+                                    fieldset.appendChild(pxGroupLabel);
+
+                                    const pxGroup = document.createElement('input');
+                                    pxGroup.type = 'number';
+                                    pxGroup.value = 0;
+                                    pxGroup.step = 1;
+                                    pxGroup.name = 'px-group';
+                                    pxGroup.classList.add('px-group');
+                                    fieldset.appendChild(pxGroup);
 
                                     const heightOutput = document.createElement('output');
                                     heightOutput.type = 'number';
@@ -564,7 +703,9 @@
 
                                     const updateHeightOutput = () => {
                                         let newHeight = stom(heightInput.value);
-                                        if (newHeight !== null) {
+                                        if (newHeight === "px") {
+                                            heightOutput.value = "?";
+                                        } else if (newHeight !== null) {
                                             heightOutput.value = newHeight;
                                         }
                                     };
