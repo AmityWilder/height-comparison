@@ -510,7 +510,18 @@
                                     heightOutput.classList.add('height-output');
                                     fieldset.appendChild(heightOutput);
 
+                                    const removeButton = document.createElement('button');
+                                    removeButton.textContent = 'remove';
+                                    removeButton.class = 'remover';
+                                    fieldset.appendChild(removeButton);
+
                                     container.appendChild(fieldset);
+
+                                    const removeCharacter = () => {
+                                        cimg.remove();
+                                        container.remove();
+                                    };
+                                    removeButton.addEventListener('click', removeCharacter);
 
                                     const updateHeightOutput = () => {
                                         let newHeight = stom(heightInput.value);
