@@ -42,6 +42,20 @@
                 img {
                     position: absolute;
                 }
+                table#meterstick {
+                    pointer-events: none;
+                    z-index: -1;
+                    border-collapse: collapse;
+                    width: 100%;
+                    bottom: 0;
+                    position: absolute;
+                    td {
+                        border-top: 1px solid rgb(255 0 0 / 33%);
+                        width: 100%;
+                        overflow: clip;
+                        padding: 0;
+                    }
+                }
             }
         </style>
     </head>
@@ -56,7 +70,9 @@
             <input type="file" id="characters" name="characters" accept="image/*" multiple />
         </label>
         <div id="inputs"></div>
-        <div id="canvas"></div>
+        <div id="canvas">
+            <table id="meterstick"></table>
+        </div>
 
         <script>
             const stomRe =
@@ -213,6 +229,10 @@
             const inputs = document.getElementById('inputs');
             /** @type HTMLDivElement */
             const canvas = document.getElementById('canvas');
+            /** @type HTMLTableElement */
+            const meterstick = document.getElementById('meterstick');
+
+            let prevTallest = 0;
 
             const updateCanvas = () => {
                 try {
@@ -227,19 +247,59 @@
                     // console.log("canvas height (px):", outHeight);
                     canvas.style.height = outHeight + 'px';
                     canvas.style.marginBlock = outHeight * 0.25 + 'px';
-
                     const scale = outHeight / tallest;
+
+                    if (tallest > 100) {
+                        if (prevTallest <= 100) {
+                            while (meterstick.childElementCount > 0) {
+                                meterstick.removeChild(meterstick.lastElementChild);
+                            }
+                        }
+                    } else {
+                        for (let i = meterstick.childElementCount; i >= Math.floor(tallest); --i) {
+                            meterstick.removeChild(meterstick.firstElementChild);
+                        }
+                        const TEXT_CUTOFF = 44;
+                        if (tallest > TEXT_CUTOFF && prevTallest <= TEXT_CUTOFF) {
+                            for (const tickmark of meterstick.children) {
+                                const cell = tickmark.children.item(0);
+                                cell.textContent = '';
+                            }
+                        } else if (tallest <= TEXT_CUTOFF && prevTallest > TEXT_CUTOFF) {
+                            for (let i = 0; i < meterstick.childElementCount; ++i) {
+                                const tickmark = meterstick.children.item(i);
+                                const cell = tickmark.children.item(0);
+                                cell.textContent = `${meterstick.childElementCount - i}m`;
+                            }
+                        }
+                        for (let i = meterstick.childElementCount; i < Math.floor(tallest); ++i) {
+                            const tickmarkRow = document.createElement('tr');
+                            const tickmarkCell = document.createElement('td');
+                            if (tallest <= 44) tickmarkCell.textContent = `${i + 1}m`;
+                            tickmarkRow.appendChild(tickmarkCell);
+                            meterstick.prepend(tickmarkRow);
+                        }
+                        for (const tickmark of meterstick.children) {
+                            const cell = tickmark.children.item(0);
+                            cell.style.height = `${scale - 1}px`;
+                            cell.style.maxHeight = `${scale - 1}px`;
+                        }
+                    }
+                    prevTallest = tallest;
+
                     let canvasWidth = 0.0;
                     // console.log("scale (px/m):", scale);
-                    for (let i = 0; i < canvas.childElementCount; ++i) {
+                    const inputContainers = inputs.getElementsByClassName('container');
+                    const canvasItems = canvas.getElementsByTagName('img');
+                    for (let i = 0; i < inputContainers.length; ++i) {
                         // console.group(`character ${i}`);
 
                         /** @type HTMLDivElement */
-                        const input = inputs.children.item(i);
+                        const input = inputContainers.item(i);
                         // console.log(input);
 
                         /** @type HTMLImageElement */
-                        const cimg = canvas.children.item(i);
+                        const cimg = canvasItems.item(i);
                         // console.log(cimg);
 
                         const naturalHeight = cimg.naturalHeight;
@@ -295,12 +355,12 @@
                         cimg.style.zIndex = -1 - order;
                         canvasWidth += cimg.clientWidth;
                     }
-                    for (let i = 0; i < canvas.childElementCount; ++i) {
+                    for (let i = 0; i < inputContainers.length; ++i) {
                         /** @type HTMLDivElement */
-                        const input = inputs.children.item(i);
+                        const input = inputContainers.item(i);
 
                         /** @type HTMLImageElement */
-                        const cimg = canvas.children.item(i);
+                        const cimg = canvasItems.item(i);
                         // console.log(cimg);
 
                         const shiftSliders = input.getElementsByClassName('shift-slider');
