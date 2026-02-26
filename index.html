@@ -238,61 +238,22 @@
 
             const updateCanvas = () => {
                 try {
-                    const heights = Array.from(document.getElementsByClassName('height-output')).map((el) => Number(el.value));
-                    // console.log("heights:", heights);
-                    if (heights.length === 0) {
-                        return;
-                    }
-                    const tallest = Math.max(...heights);
-                    // console.log("canvas height (m):", tallest);
-                    const outHeight = Number(scaleInput.value);
-                    // console.log("canvas height (px):", outHeight);
-                    canvas.style.height = outHeight + 'px';
-                    canvas.style.marginBlock = outHeight * 0.25 + 'px';
-                    const scale = outHeight / tallest;
-
-                    if (tallest > 100) {
-                        if (prevTallest <= 100) {
-                            while (meterstick.childElementCount > 0) {
-                                meterstick.removeChild(meterstick.lastElementChild);
-                            }
-                        }
-                    } else {
-                        for (let i = meterstick.childElementCount; i >= Math.floor(tallest); --i) {
-                            meterstick.removeChild(meterstick.firstElementChild);
-                        }
-                        const TEXT_CUTOFF = 44;
-                        if (tallest > TEXT_CUTOFF && prevTallest <= TEXT_CUTOFF) {
-                            for (const tickmark of meterstick.children) {
-                                const cell = tickmark.children.item(0);
-                                cell.textContent = '';
-                            }
-                        } else if (tallest <= TEXT_CUTOFF && prevTallest > TEXT_CUTOFF) {
-                            for (let i = 0; i < meterstick.childElementCount; ++i) {
-                                const tickmark = meterstick.children.item(i);
-                                const cell = tickmark.children.item(0);
-                                cell.textContent = `${meterstick.childElementCount - i}m`;
-                            }
-                        }
-                        for (let i = meterstick.childElementCount; i < Math.floor(tallest); ++i) {
-                            const tickmarkRow = document.createElement('tr');
-                            const tickmarkCell = document.createElement('td');
-                            if (tallest <= 44) tickmarkCell.textContent = `${i + 1}m`;
-                            tickmarkRow.appendChild(tickmarkCell);
-                            meterstick.prepend(tickmarkRow);
-                        }
-                        for (const tickmark of meterstick.children) {
-                            const cell = tickmark.children.item(0);
-                            cell.style.height = `${scale - 1}px`;
-                            cell.style.maxHeight = `${scale - 1}px`;
-                        }
-                    }
-                    prevTallest = tallest;
-
-                    let canvasWidth = 0.0;
-                    // console.log("scale (px/m):", scale);
                     const inputContainers = inputs.getElementsByClassName('container');
                     const canvasItems = canvas.getElementsByTagName('img');
+                    if (inputContainers.length === 0) {
+                        return;
+                    }
+                    // from bottom of measurement to top of canvas image
+
+                    /** @type number[] */
+                    const heightsM = Array();
+
+                    /** @type number[] */
+                    const botOffsetsM = Array();
+
+                    /** @type number[] */
+                    const fullHeightsM = Array();
+
                     for (let i = 0; i < inputContainers.length; ++i) {
                         // console.group(`character ${i}`);
 
@@ -321,13 +282,6 @@
                         const botNaturalPx = Number(botSlider.value);
                         // console.log("measurement bottom (char px):", botNaturalPx);
 
-                        const orderSliders = input.getElementsByClassName('order-slider');
-                        // console.log(orderSliders);
-                        const orderSlider = orderSliders.item(0);
-                        // console.log(orderSlider);
-                        const order = Number(orderSlider.value);
-                        // console.log("order:", order);
-
                         const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
                         // console.log("measurement height (char px):", measurementHeightNaturalPx);
 
@@ -341,21 +295,102 @@
                         const localScale = measurementHeightMeters / measurementHeightNaturalPx;
                         // console.log("character scale (m/char px)", localScale);
 
-                        const conversion = scale * localScale;
-                        // console.log("conversion (px/char px)", conversion);
+                        const fullHeightM = naturalHeight * localScale;
+                        // console.log("full height (m)", fullHeightM);
+                        fullHeightsM.push(fullHeightM);
 
-                        const fullHeightCanvas = naturalHeight * conversion;
+                        const botOffset = -botNaturalPx * localScale;
+                        // console.log("bottom offset (m)", botOffset);
+                        botOffsetsM.push(botOffset);
+
+                        const heightToTopM = fullHeightM + botOffset;
+                        // console.log("floor to cimg top (m)", heightToTopM);
+                        heightsM.push(heightToTopM);
+
+                        // console.groupEnd();
+                    }
+                    // console.log("heights (m):", heightsM);
+                    const tallestM = Math.max(...heightsM);
+                    // console.log("canvas height (m):", tallest);
+                    const canvasHeightPx = Number(scaleInput.value);
+                    // console.log("canvas height (px):", outHeight);
+                    canvas.style.height = canvasHeightPx + 'px';
+                    canvas.style.marginBlock = canvasHeightPx * 0.25 + 'px';
+                    const scale = canvasHeightPx / tallestM;
+
+                    if (tallestM > 100) {
+                        if (prevTallest <= 100) {
+                            while (meterstick.childElementCount > 0) {
+                                meterstick.removeChild(meterstick.lastElementChild);
+                            }
+                        }
+                    } else {
+                        for (let i = meterstick.childElementCount; i >= Math.floor(tallestM); --i) {
+                            meterstick.removeChild(meterstick.firstElementChild);
+                        }
+                        const TEXT_CUTOFF = 44;
+                        if (tallestM > TEXT_CUTOFF && prevTallest <= TEXT_CUTOFF) {
+                            for (const tickmark of meterstick.children) {
+                                const cell = tickmark.children.item(0);
+                                cell.textContent = '';
+                            }
+                        } else if (tallestM <= TEXT_CUTOFF && prevTallest > TEXT_CUTOFF) {
+                            for (let i = 0; i < meterstick.childElementCount; ++i) {
+                                const tickmark = meterstick.children.item(i);
+                                const cell = tickmark.children.item(0);
+                                cell.textContent = `${meterstick.childElementCount - i}m`;
+                            }
+                        }
+                        for (let i = meterstick.childElementCount; i < Math.floor(tallestM); ++i) {
+                            const tickmarkRow = document.createElement('tr');
+                            const tickmarkCell = document.createElement('td');
+                            if (tallestM <= 44) tickmarkCell.textContent = `${i + 1}m`;
+                            tickmarkRow.appendChild(tickmarkCell);
+                            meterstick.prepend(tickmarkRow);
+                        }
+                        for (const tickmark of meterstick.children) {
+                            const cell = tickmark.children.item(0);
+                            cell.style.height = `${scale - 1}px`;
+                            cell.style.maxHeight = `${scale - 1}px`;
+                        }
+                    }
+                    prevTallest = tallestM;
+
+                    let canvasWidthPx = 0.0;
+                    // console.log("scale (px/m):", scale);
+                    for (let i = 0; i < inputContainers.length; ++i) {
+                        // console.group(`character ${i}`);
+
+                        /** @type HTMLDivElement */
+                        const input = inputContainers.item(i);
+                        // console.log(input);
+
+                        /** @type HTMLImageElement */
+                        const cimg = canvasItems.item(i);
+                        // console.log(cimg);
+
+                        const orderSliders = input.getElementsByClassName('order-slider');
+                        // console.log(orderSliders);
+                        const orderSlider = orderSliders.item(0);
+                        // console.log(orderSlider);
+                        const order = Number(orderSlider.value);
+                        // console.log("order:", order);
+
+                        const fullHeightM = fullHeightsM[i];
+                        const botOffsetM = botOffsetsM[i];
+
+                        const fullHeightCanvas = fullHeightM * scale;
                         // console.log("full height (px)", fullHeightCanvas);
 
-                        const botOffset = -botNaturalPx * conversion;
-                        // console.log("bottom offset (px)", botOffset);
+                        const botOffsetCanvas = botOffsetM * scale;
+                        // console.log("bottom offset (px)", botOffsetCanvas);
 
                         // console.groupEnd();
 
                         cimg.style.height = fullHeightCanvas + 'px';
-                        cimg.style.bottom = botOffset + 'px';
+                        cimg.style.bottom = botOffsetCanvas + 'px';
                         cimg.style.zIndex = -1 - order;
-                        canvasWidth += cimg.clientWidth;
+                        canvasWidthPx += cimg.clientWidth;
                     }
                     for (let i = 0; i < inputContainers.length; ++i) {
                         /** @type HTMLDivElement */
@@ -372,7 +407,7 @@
                         const shiftPx = Number(shiftSlider.value);
                         // console.log("shift (px):", shiftPx);
 
-                        shiftSlider.max = canvasWidth - cimg.clientWidth;
+                        shiftSlider.max = canvasWidthPx - cimg.clientWidth;
 
                         cimg.style.left = shiftPx + 'px';
                     }
