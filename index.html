@@ -255,6 +255,7 @@
                     /** @type number[] */
                     const fullHeightsM = Array();
 
+                    let canvasWidthM = 0.0;
                     for (let i = 0; i < inputContainers.length; ++i) {
                         // console.group(`character ${i}`);
 
@@ -268,6 +269,9 @@
 
                         const naturalHeight = cimg.naturalHeight;
                         // console.log("full height (char px):", naturalHeight);
+
+                        const naturalWidth = cimg.naturalWidth;
+                        // console.log("full width (char px):", naturalWidth);
 
                         const topSliders = input.getElementsByClassName('top-slider');
                         // console.log(topSliders);
@@ -307,6 +311,9 @@
                         const heightToTopM = fullHeightM + botOffset;
                         // console.log("floor to cimg top (m)", heightToTopM);
                         heightsM.push(heightToTopM);
+
+                        const fullWidthM = naturalWidth * localScale;
+                        canvasWidthM += fullWidthM;
 
                         // console.groupEnd();
                     }
@@ -357,7 +364,6 @@
                     }
                     prevTallest = tallestM;
 
-                    let canvasWidthPx = 0.0;
                     // console.log("scale (px/m):", scale);
                     for (let i = 0; i < inputContainers.length; ++i) {
                         // console.group(`character ${i}`);
@@ -377,6 +383,17 @@
                         const order = Number(orderSlider.value);
                         // console.log("order:", order);
 
+                        const shiftSliders = input.getElementsByClassName('shift-slider');
+                        // console.log(shiftSliders);
+                        const shiftSlider = shiftSliders.item(0);
+                        // console.log(shiftSlider);
+                        const shiftM = Number(shiftSlider.value);
+                        // console.log("shift (m):", shiftM);
+                        const shiftPx = shiftM * scale;
+                        // console.log("shift (px):", shiftPx);
+
+                        shiftSlider.max = canvasWidthM;
+
                         const fullHeightM = fullHeightsM[i];
                         const botOffsetM = botOffsetsM[i];
 
@@ -391,25 +408,6 @@
                         cimg.style.height = fullHeightCanvas + 'px';
                         cimg.style.bottom = botOffsetCanvas + 'px';
                         cimg.style.zIndex = -1 - order;
-                        canvasWidthPx += cimg.clientWidth;
-                    }
-                    for (let i = 0; i < inputContainers.length; ++i) {
-                        /** @type HTMLDivElement */
-                        const input = inputContainers.item(i);
-
-                        /** @type HTMLImageElement */
-                        const cimg = canvasItems.item(i);
-                        // console.log(cimg);
-
-                        const shiftSliders = input.getElementsByClassName('shift-slider');
-                        // console.log(shiftSliders);
-                        const shiftSlider = shiftSliders.item(0);
-                        // console.log(shiftSlider);
-                        const shiftPx = Number(shiftSlider.value);
-                        // console.log("shift (px):", shiftPx);
-
-                        shiftSlider.max = canvasWidthPx - cimg.clientWidth;
-
                         cimg.style.left = shiftPx + 'px';
                     }
                 } catch (e) {
@@ -517,6 +515,7 @@
                                     shiftSlider.min = 0.0;
                                     shiftSlider.value = 0.0;
                                     shiftSlider.max = 0.0;
+                                    shiftSlider.step = 0.0001;
                                     shiftSlider.name = 'shift-slider';
                                     shiftSlider.classList.add('shift-slider');
                                     fieldset.appendChild(shiftSlider);
