@@ -15,8 +15,16 @@
                 flex-direction: row;
                 div.container {
                     position: relative;
+                    display: flex;
+                    flex-direction: row;
                     img {
-                        max-height: 500px;
+                        max-height: 400px;
+                    }
+                    div.height-indicator {
+                        position: absolute;
+                        left: 0;
+                        border: 1px solid red;
+                        pointer-events: none;
                     }
                     fieldset {
                         display: flex;
@@ -24,13 +32,6 @@
                         output::after {
                             content: 'm';
                         }
-                    }
-                    div.height-indicator {
-                        position: absolute;
-                        left: 0;
-                        right: 0;
-                        border: 1px solid red;
-                        pointer-events: none;
                     }
                 }
             }
@@ -408,6 +409,8 @@
 
                             img.addEventListener('load', () => {
                                 try {
+                                    heightIndicator.style.width = `${img.clientWidth}px`;
+
                                     const imgHeight = img.naturalHeight;
                                     const imgWidth = img.naturalWidth;
 
