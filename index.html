@@ -3,8 +3,9 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="author" content="Amy (Amity) Wilder">
         <link rel="shortcut icon" href="favicon.ico" />
-        <title>Height Comparison</title>
+        <title>Amy's Height Comparer</title>
         <style>
             input#scale::after {
                 content: 'px';
@@ -63,13 +64,169 @@
         </style>
     </head>
     <body>
+        <details>
+            <summary>help</summary>
+            <ol>
+                <li>
+                    <p>
+                        <strong>Click the "add a character" button and select 1 or more images.</strong><br/>
+                        You can do this as many times as needed until all subjects you want to compare are on the page.
+                    </p>
+                    <p>
+                        Note: Duplicate subjects <em>are</em> allowed.
+                        If you are trying to add a file with the same name as the previous one,
+                        your device may decide "that's the same file, I don't think you meant to do that" and refuse.
+                        If this happens, simply choose a different file, remove it, and add the first one again.
+                        Machines can be silly sometimes.
+                    </p>
+                    <p>
+                        Note 2: This website is entirely static.
+                        Your files will not be sent to a server; everything to do with your images is processed exclusively on your device.
+                        Once your browser has loaded the page, it does not require internet to work.
+                        If you don't believe me: this page is a single HTML file,
+                        you can save it (with ctrl+s or the right click menu) and use it offline.
+                        The page icon might not work though...
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <strong>Select the measurement area.</strong><br/>
+                        Drag the "top of measurement" slider to the left until the red line is at the top of the subject (typically the top of the head for humanoids/creatures).<br/>
+                        Drag the "bottom of measurement" slider to the right until the red line is at the bottom of the subject (typically the heels for humanoids/creatures).
+                    </p>
+                    <p>
+                        Note: the measurement does not <em>have</em> to be from heel to head.
+                        The "bottom of measurement" just needs to be the part of the subject that should be on the floor,
+                        and the "top of measurement" should be the a point on the subject with a visible, straight, vertical distance from the
+                        "bottom of measurement". That distance must be indicated by the height.
+                    </p>
+                    <p>
+                        <strong>If the top/bottom of the measurement for the subject is not visible on the image, use the top/bottom extension.</strong><br/>
+                        1 extension = 1x the height of the image added to the upper/lower bound of the "top/bottom of measurement" sliders.
+                        More specifically, "top extension"=1 will add (upward) 1 image height to the upper bound,
+                        and "bottom extension"=1 will add (downward) 1 image height to the lower bound.
+                        Extensions can be increased until you feel there is sufficient room to measure the subject.
+                    </p>
+                    <p>
+                        This is useful when the image you want to use is not a fullbody.
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <strong>Measure your subjects.</strong><br/>
+                        If you know the height of your subject--or at least the part in the measurement area--input
+                        it to the "height" textbox. I programmed it to be <em>quite</em> flexible, so you don't have to worry about conversions
+                        unless you have a particularly unusual unit. If you have any suggestions, please let me know.
+                        <details><summary><strong>Supported units/formats</strong></summary>
+                            The height value can include any of the following unit names or abbreviations, with or without a space.
+                            Only feet+inches are currently supported for <em>mixed</em> units.
+                            <p>
+                                Imperial
+                                <ul>
+                                    <li>mile, miles, mi</li>
+                                    <li>foot, feet, ft, '</li>
+                                    <li>inch(es), in, "</li>
+                                </ul>
+                            </p>
+                            <p>
+                                Metric
+                                <ul>
+                                    <li>quettameter(s), Qm</li>
+                                    <li>ronnameter(s), Rm</li>
+                                    <li>yottameter(s), Ym</li>
+                                    <li>zettameter(s), Zm</li>
+                                    <li>exameter(s), Em</li>
+                                    <li>petameter(s), Pm</li>
+                                    <li>terameter(s), Tm</li>
+                                    <li>gigameter(s), Gm</li>
+                                    <li>megameter(s), Mm</li>
+                                    <li>kilometer(s), km</li>
+                                    <li>hectometer(s), hm</li>
+                                    <li>decameter(s), dekameter(s), dam</li>
+                                    <li>meter(s), m</li>
+                                    <li>decimeter(s), dm</li>
+                                    <li>centimeter(s), cm</li>
+                                    <li>millimeter(s), mm</li>
+                                    <li>micrometer(s), μm</li>
+                                    <li>nanometer(s), nm</li>
+                                    <li>picometer(s), pm</li>
+                                    <li>femtometer(s), fm</li>
+                                    <li>attometer(s), am</li>
+                                    <li>zeptometer(s), zm</li>
+                                    <li>yoctometer(s), ym</li>
+                                    <li>rontometer(s), rm</li>
+                                    <li>quectometer(s), qm</li>
+                                </ul>
+                            </p>
+                            <p>
+                                Other
+                                <ul>
+                                    <li>lightyear(s), ly</li>
+                                </ul>
+                            </p>
+                        </details>
+                    </p>
+                    <p>
+                        <strong>If you don't know the height of your subject,</strong>
+                        but you have another subject you <em>do</em> know the height of, and both have the same scale,
+                        (i.e. 1px in subject A = 1px in subject B; for example, both are from the same game and are screenshotted at the same level of zoom)
+                        put the unknown subject's height as "px" and make sure both subjects are in the same "pixel group".
+                    </p>
+                    <p>
+                        Pixel groups will use the average "local scale" (meters per pixel) of members with known height to calculate the heights
+                        of members with unknown ("px") heights. The calculated height will appear on the "output height" and will be automatically
+                        used to scale them as though their height is known. Use this feature if you have an in-game screenshot of a standardized
+                        bottle of diet coke and want to use it to determine how tall the protagonist is.
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <strong>Organize your subjects.</strong><br/>
+                    </p>
+                    <ul>
+                        <li>
+                            <p>
+                                <strong>Left/right</strong><br/>
+                                Use the "horizontal offset" slider to move subjects around to the left or right on the canvas.
+                                The "horizontal offset" slider works in meters and has a range equal to the width of all of your subjects standing side by side.
+                            </p>
+                            <p>
+                                Changing the height of a subject may impact where they are positioned horizontally, as it will change how wide they are.
+                            </p>
+                        </li>
+                        <li>
+                            <p>
+                                <strong>Front/back</strong><br/>
+                                If a subject is in front of another subject, use the "order" input to change what order they are shown in.
+                                Subjects with an "order" of 0 will be displayed on the canvas in the order (back to front) they appear on the input
+                                (which is determined by the order they were added with the "add a character" button).
+                            </p>
+                            <p>
+                                A higher "order" number will move the subject forward (in front of others), while a lower "order" number will move them backward (behind others).
+                            </p>
+                        </li>
+                    </ul>
+                    <p>
+                        Subjects cannot be moved up/down, because the entire point of this tool is to compare their height.
+                        However, I am open to discussion if you have a case that would make such a feature useful.
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <strong>Saving the chart</strong><br/>
+                        Sadly, there is no way to save the output at the moment.
+                        When you are finished, just zoom out (or in, or not at all) and take a screenshot.
+                    </p>
+                </li>
+            </ol>
+        </details>
         <label>
-            Canvas height (px)
+            canvas height (px)
             <input type="number" id="scale" min="0" value="1024" step="1" name="scale" />
         </label>
         <br />
         <label>
-            Add a character
+            add a character
             <input type="file" id="characters" name="characters" accept="image/*" multiple />
         </label>
         <div id="inputs"></div>
@@ -78,8 +235,9 @@
         </div>
 
         <script>
+            // NOT case-insensitive!! Consider mm (millimeters) vs Mm (megameters)
             const stomRe =
-                /^(?:(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:f(?:oo|ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\")?)?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?))|(?:(?<mi>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?mi(?:les?)?)|(?:(?<ly>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:lightyears?|ly)))$/i;
+                /^(?:(?:(?<ft>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:f(?:oo|ee)?t|') ?(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\")?)?)|(?:(?<in>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:in(?:ch(?:es)?)?|\"))|(?:(?<m>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:(?<p>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<p>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)meters?))|(?:(?<mi>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?mi(?:les?)?)|(?:(?<ly>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?) ?(?:lightyears?|ly)))$/;
             /**
              * Convert a string to meters.
              * Returns `null` if invalid measurement.
@@ -539,7 +697,7 @@
 
                         cimg.style.height = fullHeightCanvas + 'px';
                         cimg.style.bottom = botOffsetCanvas + 'px';
-                        cimg.style.zIndex = -1 - order;
+                        cimg.style.zIndex = order - 1;
                         cimg.style.left = shiftPx + 'px';
                     }
                 } catch (e) {
@@ -654,7 +812,7 @@
 
                                     const orderSliderLabel = document.createElement('label');
                                     orderSliderLabel.htmlFor = 'order-slider';
-                                    orderSliderLabel.textContent = 'order (0 = front)';
+                                    orderSliderLabel.textContent = 'order';
                                     fieldset.appendChild(orderSliderLabel);
 
                                     const orderSlider = document.createElement('input');
