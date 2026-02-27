@@ -34,6 +34,13 @@
                     fieldset {
                         display: flex;
                         flex-direction: column;
+                        gap: 0.5ex;
+                        label {
+                            display: block;
+                            input {
+                                display: block;
+                            }
+                        }
                         output::after {
                             content: 'm';
                         }
@@ -783,7 +790,7 @@
                             topSlider.value = imgHeight;
                             topSlider.name = 'top-slider';
                             topSlider.classList.add('top-slider');
-                            fieldset.appendChild(topSlider);
+                            topSliderLabel.appendChild(topSlider);
 
                             const botSliderLabel = document.createElement('label');
                             botSliderLabel.htmlFor = 'bot-slider';
@@ -797,7 +804,7 @@
                             botSlider.value = 0.0;
                             botSlider.name = 'bot-slider';
                             botSlider.classList.add('bot-slider');
-                            fieldset.appendChild(botSlider);
+                            botSliderLabel.appendChild(botSlider);
 
                             const topExLabel = document.createElement('label');
                             topExLabel.htmlFor = 'top-ex';
@@ -810,7 +817,7 @@
                             topEx.value = 0.0;
                             topEx.name = 'top-ex';
                             topEx.classList.add('top-ex');
-                            fieldset.appendChild(topEx);
+                            topExLabel.appendChild(topEx);
 
                             const botExLabel = document.createElement('label');
                             botExLabel.htmlFor = 'bot-ex';
@@ -823,7 +830,7 @@
                             botEx.value = 0.0;
                             botEx.name = 'bot-ex';
                             botEx.classList.add('bot-ex');
-                            fieldset.appendChild(botEx);
+                            botExLabel.appendChild(botEx);
 
                             const shiftSliderLabel = document.createElement('label');
                             shiftSliderLabel.htmlFor = 'shift-slider';
@@ -838,7 +845,7 @@
                             shiftSlider.step = 0.0001;
                             shiftSlider.name = 'shift-slider';
                             shiftSlider.classList.add('shift-slider');
-                            fieldset.appendChild(shiftSlider);
+                            shiftSliderLabel.appendChild(shiftSlider);
 
                             const orderSliderLabel = document.createElement('label');
                             orderSliderLabel.htmlFor = 'order-slider';
@@ -850,7 +857,7 @@
                             orderSlider.value = 0;
                             orderSlider.name = 'order-slider';
                             orderSlider.classList.add('order-slider');
-                            fieldset.appendChild(orderSlider);
+                            orderSliderLabel.appendChild(orderSlider);
 
                             const heightLabel = document.createElement('label');
                             heightLabel.htmlFor = 'height';
@@ -863,7 +870,7 @@
                             heightInput.value = `5'9"`;
                             heightInput.name = 'height';
                             heightInput.classList.add('height-input');
-                            fieldset.appendChild(heightInput);
+                            heightLabel.appendChild(heightInput);
 
                             const heightOutput = document.createElement('output');
                             heightOutput.type = 'number';
@@ -892,7 +899,7 @@
                                 pxGroupContainer.appendChild(pxGroup);
                             }
 
-                            fieldset.appendChild(pxGroupContainer);
+                            pxGroupLabel.appendChild(pxGroupContainer);
 
                             const removeButton = document.createElement('button');
                             removeButton.textContent = 'remove';
@@ -965,7 +972,7 @@
                             updateCanvas();
                         }
                     }
-                } catch {
+                } catch (e) {
                     console.error(e);
                 }
             });
