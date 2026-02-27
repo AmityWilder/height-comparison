@@ -37,7 +37,7 @@
                         output::after {
                             content: 'm';
                         }
-                        div.px-group-container {
+                        .px-group-container {
                             display: flex;
                             flex-direction: row wrap;
                         }
@@ -952,7 +952,16 @@
                                     };
                                     topEx.addEventListener('change', updateTopEx);
 
-                                    fieldset.addEventListener('input', updateCanvas);
+                                    // rule: parsed field -> change, slider -> input
+                                    topSlider.addEventListener('input', updateCanvas);
+                                    botSlider.addEventListener('input', updateCanvas);
+                                    topEx.addEventListener('change', updateCanvas);
+                                    botEx.addEventListener('change', updateCanvas);
+                                    shiftSlider.addEventListener('input', updateCanvas);
+                                    orderSlider.addEventListener('change', updateCanvas);
+                                    heightInput.addEventListener('change', updateCanvas);
+                                    pxGroupContainer.addEventListener('change', updateCanvas);
+                                    removeButton.addEventListener('click', updateCanvas);
                                 } catch (e) {
                                     console.error(e);
                                 }
