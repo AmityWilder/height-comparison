@@ -431,6 +431,7 @@
             const meterstick = document.getElementById('meterstick');
 
             let prevTallest = 0;
+            let scale;
 
             const updateCanvas = () => {
                 try {
@@ -650,7 +651,7 @@
                     // console.log("canvas height (px):", outHeight);
                     canvas.style.height = canvasHeightPx + 'px';
                     canvas.style.marginBlock = canvasHeightPx * 0.25 + 'px';
-                    const scale = canvasHeightPx / tallestM;
+                    scale = canvasHeightPx / tallestM;
 
                     if (tallestM > 100) {
                         if (prevTallest <= 100) {
@@ -702,13 +703,6 @@
                         const cimg = canvasItems.item(i);
                         // console.log(cimg);
 
-                        const orderSliders = input.getElementsByClassName('order-slider');
-                        // console.log(orderSliders);
-                        const orderSlider = orderSliders.item(0);
-                        // console.log(orderSlider);
-                        const order = Number(orderSlider.value);
-                        // console.log("order:", order);
-
                         const shiftSliders = input.getElementsByClassName('shift-slider');
                         // console.log(shiftSliders);
                         const shiftSlider = shiftSliders.item(0);
@@ -733,7 +727,6 @@
 
                         cimg.style.height = fullHeightCanvas + 'px';
                         cimg.style.bottom = botOffsetCanvas + 'px';
-                        cimg.style.zIndex = order - 1;
                         cimg.style.left = shiftPx + 'px';
                     }
                 } catch (e) {
@@ -742,8 +735,8 @@
             };
             scaleInput.addEventListener('change', () => {
                 canvas.style.height = scaleInput.value + 'px';
+                updateCanvas();
             });
-            scaleInput.addEventListener('change', updateCanvas);
 
             characters.addEventListener('change', async () => {
                 try {
@@ -925,18 +918,19 @@
                             heightInput.addEventListener('input', updateHeightOutput);
 
                             const updateHeightIndicator = () => {
-                                try {
-                                    botSlider.value = Math.min(botSlider.value, topSlider.value);
-                                    let scale = img.clientHeight / imgHeight;
-                                    heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
-                                    heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
-                                } catch (e) {
-                                    console.error(e);
-                                }
+                                let scale = img.clientHeight / imgHeight;
+                                heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
+                                heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
                             };
                             updateHeightIndicator();
-                            botSlider.addEventListener('input', updateHeightIndicator);
-                            topSlider.addEventListener('input', updateHeightIndicator);
+                            botSlider.addEventListener('input', () => {
+                                topSlider.value = Math.max(Number(botSlider.value) + 1, Number(topSlider.value));
+                                updateHeightIndicator();
+                            });
+                            topSlider.addEventListener('input', () => {
+                                botSlider.value = Math.min(Number(botSlider.value), Number(topSlider.value) - 1);
+                                updateHeightIndicator();
+                            });
 
                             botEx.addEventListener('change', () => {
                                 let newMin = imgHeight * -botEx.value;
@@ -949,13 +943,22 @@
                                 topSlider.max = newMax;
                             });
 
+                            shiftSlider.addEventListener('input', () => {
+                                const shiftM = Number(shiftSlider.value);
+                                const shiftPx = shiftM * scale;
+                                cimg.style.left = shiftPx + 'px';
+                            });
+
+                            orderSlider.addEventListener('change', () => {
+                                const order = Number(orderSlider.value);
+                                cimg.style.zIndex = order - 1;
+                            });
+
                             // rule: parsed field -> change, slider -> input
                             topSlider.addEventListener('input', updateCanvas);
                             botSlider.addEventListener('input', updateCanvas);
                             topEx.addEventListener('change', updateCanvas);
                             botEx.addEventListener('change', updateCanvas);
-                            shiftSlider.addEventListener('input', updateCanvas);
-                            orderSlider.addEventListener('change', updateCanvas);
                             heightInput.addEventListener('change', updateCanvas);
                             pxGroupContainer.addEventListener('change', updateCanvas);
                             removeButton.addEventListener('click', updateCanvas);
