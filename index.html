@@ -24,7 +24,11 @@
                     div.height-indicator {
                         position: absolute;
                         left: 0;
-                        border: 1px solid red;
+                        border-top: 1px solid #333;
+                        border-bottom: 1px solid #333;
+                        isolation: isolate;
+                        mix-blend-mode: difference;
+                        filter: invert();
                         pointer-events: none;
                     }
                     fieldset {
@@ -91,8 +95,8 @@
                 <li>
                     <p>
                         <strong>Select the measurement area.</strong><br/>
-                        Drag the "top of measurement" slider to the left until the red line is at the top of the subject (typically the top of the head for humanoids/creatures).<br/>
-                        Drag the "bottom of measurement" slider to the right until the red line is at the bottom of the subject (typically the heels for humanoids/creatures).
+                        Drag the "top of measurement" slider to the left until the top line is at the top of the subject (typically the top of the head for humanoids/creatures).<br/>
+                        Drag the "bottom of measurement" slider to the right until the bottom line is at the bottom of the subject (typically the heels for humanoids/creatures).
                     </p>
                     <p>
                         Note: the measurement does not <em>have</em> to be from heel to head.
