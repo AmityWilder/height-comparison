@@ -37,6 +37,10 @@
                         output::after {
                             content: 'm';
                         }
+                        div.px-group-container {
+                            display: flex;
+                            flex-direction: row wrap;
+                        }
                     }
                 }
             }
@@ -457,10 +461,11 @@
                         const measurementHeightMeters = Number(heightOutput.value);
                         // console.log("measurement height (m):", measurementHeightMeters);
 
-                        const pxGroups = input.getElementsByClassName('px-group');
-                        // console.log(pxGroups);
-                        const pxGroup = pxGroups.item(0);
+                        const pxGroup = input.querySelector('input.px-group:checked');
                         // console.log(pxGroup);
+                        if (pxGroup === null) {
+                            console.error("pixel group is not optional");
+                        }
                         /** @type {number} */
                         const pxGroupId = pxGroup.value;
                         // console.log("pixel group ID", pxGroupId);
@@ -542,10 +547,11 @@
                         const heightOutput = heightOutputs.item(0);
                         // console.log(heightOutput);
 
-                        const pxGroups = input.getElementsByClassName('px-group');
-                        // console.log(pxGroups);
-                        const pxGroup = pxGroups.item(0);
+                        const pxGroup = input.querySelector('input.px-group:checked');
                         // console.log(pxGroup);
+                        if (pxGroup === null) {
+                            console.error("pixel group is not optional");
+                        }
                         /** @type {number} */
                         const pxGroupId = pxGroup.value;
                         // console.log("pixel group ID", pxGroupId);
@@ -555,8 +561,9 @@
                         // console.log("character scale (m/char px)", localScale);
                         let localScale;
                         if (localScales === undefined) {
-                            console.warn(`no known size for pixel group ${pxGroupId}`);
-                            localScale = 1.0;
+                            // console.warn(`no known size for pixel group ${pxGroupId}`);
+                            heightOutput.value = '?';
+                            continue;
                         } else {
                             localScale = localScales.reduce((p, c) => p + c) / localScales.length;
                         }
@@ -839,23 +846,34 @@
                                     heightInput.classList.add('height-input');
                                     fieldset.appendChild(heightInput);
 
-                                    const pxGroupLabel = document.createElement('label');
-                                    pxGroupLabel.htmlFor = 'px-group';
-                                    pxGroupLabel.textContent = 'pixel group';
-                                    fieldset.appendChild(pxGroupLabel);
-
-                                    const pxGroup = document.createElement('input');
-                                    pxGroup.type = 'number';
-                                    pxGroup.value = 0;
-                                    pxGroup.step = 1;
-                                    pxGroup.name = 'px-group';
-                                    pxGroup.classList.add('px-group');
-                                    fieldset.appendChild(pxGroup);
-
                                     const heightOutput = document.createElement('output');
                                     heightOutput.type = 'number';
                                     heightOutput.classList.add('height-output');
                                     fieldset.appendChild(heightOutput);
+
+                                    const pxGroupIdName = `px-group${inputs.childElementCount - 1}`;
+
+                                    const pxGroupLabel = document.createElement('label');
+                                    pxGroupLabel.htmlFor = pxGroupIdName;
+                                    pxGroupLabel.textContent = 'pixel group';
+                                    fieldset.appendChild(pxGroupLabel);
+
+                                    const pxGroupContainer = document.createElement('div');
+                                    pxGroupContainer.classList.add("px-group-container")
+
+                                    for (let i = 0; i < 8; ++i) {
+                                        const pxGroup = document.createElement('input');
+                                        pxGroup.type = 'radio';
+                                        pxGroup.value = i;
+                                        pxGroup.name = pxGroupIdName;
+                                        pxGroup.classList.add('px-group');
+                                        if (i === 0) {
+                                            pxGroup.checked = true;
+                                        }
+                                        pxGroupContainer.appendChild(pxGroup);
+                                    }
+
+                                    fieldset.appendChild(pxGroupContainer);
 
                                     const removeButton = document.createElement('button');
                                     removeButton.textContent = 'remove';
