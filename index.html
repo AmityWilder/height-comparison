@@ -939,15 +939,31 @@
                                 updateHeightIndicator();
                             });
 
+                            const updateMeasurementSliderWidths = () => {
+                                try {
+                                    const newWidth = (200 * (Number(topEx.value) + Number(botEx.value) + 1)) + 'px';
+                                    botSlider.style.width = newWidth;
+                                    topSlider.style.width = newWidth;
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            };
+                            updateMeasurementSliderWidths();
                             botEx.addEventListener('change', () => {
                                 let newMin = imgHeight * -botEx.value;
                                 botSlider.min = newMin;
                                 topSlider.min = newMin;
+                                updateMeasurementSliderWidths();
+                                updateHeightIndicator();
+                                updateCanvas(); // min and max must be updated before refreshing the canvas
                             });
                             topEx.addEventListener('change', () => {
                                 let newMax = imgHeight * topEx.value + imgHeight;
                                 botSlider.max = newMax;
                                 topSlider.max = newMax;
+                                updateMeasurementSliderWidths();
+                                updateHeightIndicator();
+                                updateCanvas(); // min and max must be updated before refreshing the canvas
                             });
 
                             shiftSlider.addEventListener('input', () => {
@@ -964,8 +980,6 @@
                             // rule: parsed field -> change, slider -> input
                             topSlider.addEventListener('input', updateCanvas);
                             botSlider.addEventListener('input', updateCanvas);
-                            topEx.addEventListener('change', updateCanvas);
-                            botEx.addEventListener('change', updateCanvas);
                             heightInput.addEventListener('change', updateCanvas);
                             pxGroupContainer.addEventListener('change', updateCanvas);
                             removeButton.addEventListener('click', updateCanvas);
