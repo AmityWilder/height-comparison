@@ -437,6 +437,8 @@
             /** @type {HTMLTableElement} */
             const meterstick = document.getElementById('meterstick');
 
+            const PIXEL_GROUP_COUNT = 8;
+
             let prevTallest = 0;
             let scale;
 
@@ -451,87 +453,56 @@
 
                     /** @type {number[]} */
                     const heightsM = Array(inputContainers.length);
-
                     /** @type {number[]} */
                     const botOffsetsM = Array(inputContainers.length);
-
                     /** @type {number[]} */
                     const fullHeightsM = Array(inputContainers.length);
 
                     let canvasWidthM = 0.0;
-                    /**
-                     * Uses last scale for group
-                     * Keyed by group number
-                     * @type {{[key: number]: number[]}}
-                     */
-                    const unknownLocalScales = {};
+
+                    /** @type {number[][]} */
+                    const unknownLocalScales = new Array(PIXEL_GROUP_COUNT);
+
                     // knowns
                     for (let i = 0; i < inputContainers.length; ++i) {
-                        // console.group(`character ${i}`);
-
                         /** @type {HTMLDivElement} */
                         const input = inputContainers.item(i);
-                        // console.log(input);
 
-                        const heightInputs = input.getElementsByClassName('height-input');
-                        // console.log(heightInputs);
-                        const heightInput = heightInputs.item(0);
-                        // console.log(heightInput);
+                        const heightInput = input.getElementsByClassName('height-input').item(0);
                         if (heightInput.value === "px") {
-                            // console.groupEnd();
                             continue;
                         }
 
-                        const heightOutputs = input.getElementsByClassName('height-output');
-                        // console.log(heightOutputs);
-                        const heightOutput = heightOutputs.item(0);
-                        // console.log(heightOutput);
+                        const heightOutput = input.getElementsByClassName('height-output').item(0);
                         if (heightOutput.value === "?") {
                             console.warn("height output should not be '?' if height input is not 'px'");
-                            // console.groupEnd();
                             continue;
                         }
                         const measurementHeightMeters = Number(heightOutput.value);
-                        // console.log("measurement height (m):", measurementHeightMeters);
 
                         const pxGroup = input.querySelector('input.px-group:checked');
-                        // console.log(pxGroup);
                         if (pxGroup === null) {
                             console.error("pixel group is not optional");
                         }
                         /** @type {number} */
                         const pxGroupId = pxGroup.value;
-                        // console.log("pixel group ID", pxGroupId);
 
                         /** @type {HTMLImageElement} */
                         const cimg = canvasItems.item(i);
-                        // console.log(cimg);
 
                         const naturalHeight = cimg.naturalHeight;
-                        // console.log("full height (char px):", naturalHeight);
 
                         const naturalWidth = cimg.naturalWidth;
-                        // console.log("full width (char px):", naturalWidth);
 
-                        const topSliders = input.getElementsByClassName('top-slider');
-                        // console.log(topSliders);
-                        const topSlider = topSliders.item(0);
-                        // console.log(topSlider);
+                        const topSlider = input.getElementsByClassName('top-slider').item(0);
                         const topNaturalPx = Number(topSlider.value);
-                        // console.log("measurement top (char px):", topNaturalPx);
 
-                        const botSliders = input.getElementsByClassName('bot-slider');
-                        // console.log(botSliders);
-                        const botSlider = botSliders.item(0);
-                        // console.log(botSlider);
+                        const botSlider = input.getElementsByClassName('bot-slider').item(0);
                         const botNaturalPx = Number(botSlider.value);
-                        // console.log("measurement bottom (char px):", botNaturalPx);
 
                         const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
-                        // console.log("measurement height (char px):", measurementHeightNaturalPx);
 
                         const localScale = measurementHeightMeters / measurementHeightNaturalPx;
-                        // console.log("character scale (m/char px)", localScale);
 
                         if (unknownLocalScales[pxGroupId] === undefined) {
                             unknownLocalScales[pxGroupId] = [localScale];
@@ -540,122 +511,83 @@
                         }
 
                         const fullHeightM = naturalHeight * localScale;
-                        // console.log("full height (m)", fullHeightM);
                         fullHeightsM[i] = fullHeightM;
 
                         const botOffset = -botNaturalPx * localScale;
-                        // console.log("bottom offset (m)", botOffset);
                         botOffsetsM[i] = botOffset;
 
                         const heightToTopM = fullHeightM + botOffset;
-                        // console.log("floor to cimg top (m)", heightToTopM);
                         heightsM[i] = heightToTopM;
 
                         const fullWidthM = naturalWidth * localScale;
                         canvasWidthM += fullWidthM;
-
-                        // console.groupEnd();
                     }
+
+                    const unknownLocalScaleAvgs = unknownLocalScales.map((arr) =>
+                        arr.length === 0
+                            ? undefined
+                            : arr.reduce((p, c) => p + c) / arr.length
+                    );
                     // unknowns
                     for (let i = 0; i < inputContainers.length; ++i) {
-                        // console.group(`character ${i}`);
-
                         /** @type {HTMLDivElement} */
                         const input = inputContainers.item(i);
-                        // console.log(input);
 
-                        const heightInputs = input.getElementsByClassName('height-input');
-                        // console.log(heightInputs);
-                        const heightInput = heightInputs.item(0);
-                        // console.log(heightInput);
-                        // console.log(heightInput.value);
+                        const heightInput = input.getElementsByClassName('height-input').item(0);
                         if (heightInput.value !== "px") {
-                            // console.groupEnd();
                             continue;
                         }
 
                         // heightOutput might not be "?" if it was assigned previous update
-                        const heightOutputs = input.getElementsByClassName('height-output');
-                        // console.log(heightOutputs);
-                        const heightOutput = heightOutputs.item(0);
-                        // console.log(heightOutput);
+                        const heightOutput = input.getElementsByClassName('height-output').item(0);
 
                         const pxGroup = input.querySelector('input.px-group:checked');
-                        // console.log(pxGroup);
                         if (pxGroup === null) {
                             console.error("pixel group is not optional");
                         }
                         /** @type {number} */
                         const pxGroupId = pxGroup.value;
-                        // console.log("pixel group ID", pxGroupId);
 
                         /** @type {number[]|undefined} */
-                        const localScales = unknownLocalScales[pxGroupId];
-                        // console.log("character scale (m/char px)", localScale);
-                        let localScale;
-                        if (localScales === undefined) {
-                            // console.warn(`no known size for pixel group ${pxGroupId}`);
+                        const localScale = unknownLocalScaleAvgs[pxGroupId];
+                        if (localScale === undefined) {
                             heightOutput.value = '?';
                             continue;
-                        } else {
-                            localScale = localScales.reduce((p, c) => p + c) / localScales.length;
                         }
-                        // console.log("character scale (m/char px)", localScale);
 
                         /** @type {HTMLImageElement} */
                         const cimg = canvasItems.item(i);
-                        // console.log(cimg);
 
                         const naturalHeight = cimg.naturalHeight;
-                        // console.log("full height (char px):", naturalHeight);
-
                         const naturalWidth = cimg.naturalWidth;
-                        // console.log("full width (char px):", naturalWidth);
 
-                        const topSliders = input.getElementsByClassName('top-slider');
-                        // console.log(topSliders);
-                        const topSlider = topSliders.item(0);
-                        // console.log(topSlider);
+                        const topSlider = input.getElementsByClassName('top-slider').item(0);
                         const topNaturalPx = Number(topSlider.value);
-                        // console.log("measurement top (char px):", topNaturalPx);
 
-                        const botSliders = input.getElementsByClassName('bot-slider');
-                        // console.log(botSliders);
-                        const botSlider = botSliders.item(0);
-                        // console.log(botSlider);
+                        const botSlider = input.getElementsByClassName('bot-slider').item(0);
                         const botNaturalPx = Number(botSlider.value);
-                        // console.log("measurement bottom (char px):", botNaturalPx);
 
                         const measurementHeightNaturalPx = topNaturalPx - botNaturalPx;
-                        // console.log("measurement height (char px):", measurementHeightNaturalPx);
 
                         const measurementHeightMeters = localScale * measurementHeightNaturalPx;
-                        // console.log("character scale (m/char px)", localScale);
 
                         heightOutput.value = measurementHeightMeters;
 
                         const fullHeightM = naturalHeight * localScale;
-                        // console.log("full height (m)", fullHeightM);
                         fullHeightsM[i] = fullHeightM;
 
                         const botOffset = -botNaturalPx * localScale;
-                        // console.log("bottom offset (m)", botOffset);
                         botOffsetsM[i] = botOffset;
 
                         const heightToTopM = fullHeightM + botOffset;
-                        // console.log("floor to cimg top (m)", heightToTopM);
                         heightsM[i] = heightToTopM;
 
                         const fullWidthM = naturalWidth * localScale;
                         canvasWidthM += fullWidthM;
-
-                        // console.groupEnd();
                     }
-                    // console.log("heights (m):", heightsM);
+                    
                     const tallestM = Math.max(...heightsM);
-                    // console.log("canvas height (m):", tallest);
                     const canvasHeightPx = Number(scaleInput.value);
-                    // console.log("canvas height (px):", outHeight);
                     canvas.style.height = canvasHeightPx + 'px';
                     canvas.style.marginBlock = canvasHeightPx * 0.25 + 'px';
                     scale = canvasHeightPx / tallestM;
@@ -701,26 +633,17 @@
                     }
                     prevTallest = tallestM;
 
-                    // console.log("scale (px/m):", scale);
                     for (let i = 0; i < inputContainers.length; ++i) {
-                        // console.group(`character ${i}`);
 
                         /** @type {HTMLDivElement} */
                         const input = inputContainers.item(i);
-                        // console.log(input);
 
                         /** @type {HTMLImageElement} */
                         const cimg = canvasItems.item(i);
-                        // console.log(cimg);
 
-                        const shiftSliders = input.getElementsByClassName('shift-slider');
-                        // console.log(shiftSliders);
-                        const shiftSlider = shiftSliders.item(0);
-                        // console.log(shiftSlider);
+                        const shiftSlider = input.getElementsByClassName('shift-slider').item(0);
                         const shiftM = Number(shiftSlider.value);
-                        // console.log("shift (m):", shiftM);
                         const shiftPx = shiftM * scale;
-                        // console.log("shift (px):", shiftPx);
 
                         shiftSlider.max = canvasWidthM;
 
@@ -728,12 +651,8 @@
                         const botOffsetM = botOffsetsM[i];
 
                         const fullHeightCanvas = fullHeightM * scale;
-                        // console.log("full height (px)", fullHeightCanvas);
 
                         const botOffsetCanvas = botOffsetM * scale;
-                        // console.log("bottom offset (px)", botOffsetCanvas);
-
-                        // console.groupEnd();
 
                         cimg.style.height = fullHeightCanvas + 'px';
                         cimg.style.bottom = botOffsetCanvas + 'px';
@@ -743,252 +662,259 @@
                     console.error(e);
                 }
             };
+            
             scaleInput.addEventListener('change', () => {
                 canvas.style.height = scaleInput.value + 'px';
                 updateCanvas();
             });
 
-            characters.addEventListener('change', async () => {
+            /**
+             * Add a character/subject to the page, both to the inputs list and the canvas.
+             * Does not call `updateCanvas()`, in case of batch adds
+             * @param fileURL {string}
+             */
+            const addCharacter = async (fileURL) => {
+                try {
+                    const container = document.createElement('div');
+                    container.classList.add('container');
+                    inputs.appendChild(container);
+
+                    const img = document.createElement('img');
+                    img.src = fileURL;
+                    container.appendChild(img);
+
+                    const cimg = document.createElement('img');
+                    cimg.src = fileURL;
+                    canvas.appendChild(cimg);
+
+                    // Wait for the img to load so image data is ready
+                    await new Promise((resolve) => img.addEventListener('load', resolve));
+
+                    const heightIndicator = document.createElement('div');
+                    heightIndicator.classList.add('height-indicator');
+                    container.appendChild(heightIndicator);
+
+                    heightIndicator.style.width = `${img.clientWidth}px`;
+
+                    const imgHeight = img.naturalHeight;
+                    const imgWidth = img.naturalWidth;
+
+                    const fieldset = document.createElement('fieldset');
+
+                    const topSliderLabel = document.createElement('label');
+                    topSliderLabel.htmlFor = 'top-slider';
+                    topSliderLabel.textContent = 'top of measurement';
+                    fieldset.appendChild(topSliderLabel);
+
+                    const topSlider = document.createElement('input');
+                    topSlider.type = 'range';
+                    topSlider.min = 0.0;
+                    topSlider.max = imgHeight;
+                    topSlider.value = imgHeight;
+                    topSlider.name = 'top-slider';
+                    topSlider.classList.add('top-slider');
+                    topSliderLabel.appendChild(topSlider);
+
+                    const botSliderLabel = document.createElement('label');
+                    botSliderLabel.htmlFor = 'bot-slider';
+                    botSliderLabel.textContent = 'bottom of measurement';
+                    fieldset.appendChild(botSliderLabel);
+
+                    const botSlider = document.createElement('input');
+                    botSlider.type = 'range';
+                    botSlider.min = 0.0;
+                    botSlider.max = imgHeight;
+                    botSlider.value = 0.0;
+                    botSlider.name = 'bot-slider';
+                    botSlider.classList.add('bot-slider');
+                    botSliderLabel.appendChild(botSlider);
+
+                    const topExLabel = document.createElement('label');
+                    topExLabel.htmlFor = 'top-ex';
+                    topExLabel.textContent = 'top extension';
+                    fieldset.appendChild(topExLabel);
+
+                    const topEx = document.createElement('input');
+                    topEx.type = 'number';
+                    topEx.min = 0.0;
+                    topEx.value = 0.0;
+                    topEx.name = 'top-ex';
+                    topEx.classList.add('top-ex');
+                    topExLabel.appendChild(topEx);
+
+                    const botExLabel = document.createElement('label');
+                    botExLabel.htmlFor = 'bot-ex';
+                    botExLabel.textContent = 'bottom extension';
+                    fieldset.appendChild(botExLabel);
+
+                    const botEx = document.createElement('input');
+                    botEx.type = 'number';
+                    botEx.min = 0.0;
+                    botEx.value = 0.0;
+                    botEx.name = 'bot-ex';
+                    botEx.classList.add('bot-ex');
+                    botExLabel.appendChild(botEx);
+
+                    const shiftSliderLabel = document.createElement('label');
+                    shiftSliderLabel.htmlFor = 'shift-slider';
+                    shiftSliderLabel.textContent = 'horizontal offset';
+                    fieldset.appendChild(shiftSliderLabel);
+
+                    const shiftSlider = document.createElement('input');
+                    shiftSlider.type = 'range';
+                    shiftSlider.min = 0.0;
+                    shiftSlider.value = 0.0;
+                    shiftSlider.max = 0.0;
+                    shiftSlider.step = 0.0001;
+                    shiftSlider.name = 'shift-slider';
+                    shiftSlider.classList.add('shift-slider');
+                    shiftSliderLabel.appendChild(shiftSlider);
+
+                    const orderSliderLabel = document.createElement('label');
+                    orderSliderLabel.htmlFor = 'order-slider';
+                    orderSliderLabel.textContent = 'order';
+                    fieldset.appendChild(orderSliderLabel);
+
+                    const orderSlider = document.createElement('input');
+                    orderSlider.type = 'number';
+                    orderSlider.value = 0;
+                    orderSlider.name = 'order-slider';
+                    orderSlider.classList.add('order-slider');
+                    orderSliderLabel.appendChild(orderSlider);
+
+                    const heightLabel = document.createElement('label');
+                    heightLabel.htmlFor = 'height';
+                    heightLabel.textContent = 'height';
+                    fieldset.appendChild(heightLabel);
+
+                    const heightInput = document.createElement('input');
+                    heightInput.type = 'text';
+                    heightInput.min = 0;
+                    heightInput.value = `5'9"`;
+                    heightInput.name = 'height';
+                    heightInput.classList.add('height-input');
+                    heightLabel.appendChild(heightInput);
+
+                    const heightOutput = document.createElement('output');
+                    heightOutput.type = 'number';
+                    heightOutput.classList.add('height-output');
+                    fieldset.appendChild(heightOutput);
+
+                    const pxGroupIdName = `px-group${inputs.childElementCount - 1}`;
+
+                    const pxGroupLabel = document.createElement('label');
+                    pxGroupLabel.htmlFor = pxGroupIdName;
+                    pxGroupLabel.textContent = 'pixel group';
+                    fieldset.appendChild(pxGroupLabel);
+
+                    const pxGroupContainer = document.createElement('div');
+                    pxGroupContainer.classList.add("px-group-container")
+                    for (let i = 0; i < PIXEL_GROUP_COUNT; ++i) {
+                        const pxGroup = document.createElement('input');
+                        pxGroup.type = 'radio';
+                        pxGroup.value = i;
+                        pxGroup.name = pxGroupIdName;
+                        pxGroup.classList.add('px-group');
+                        if (i === 0) {
+                            pxGroup.checked = true;
+                        }
+                        pxGroupContainer.appendChild(pxGroup);
+                    }
+                    pxGroupContainer.addEventListener('change', updateCanvas);
+                    pxGroupLabel.appendChild(pxGroupContainer);
+
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'remove';
+                    removeButton.class = 'remover';
+                    removeButton.addEventListener('click', updateCanvas);
+                    fieldset.appendChild(removeButton);
+
+                    container.appendChild(fieldset);
+
+                    removeButton.addEventListener('click', () => {
+                        cimg.remove();
+                        container.remove();
+                    });
+
+                    const updateHeightOutput = () => {
+                        let newHeight = stom(heightInput.value);
+                        if (newHeight === "px") {
+                            heightOutput.value = "?";
+                        } else if (newHeight !== null) {
+                            heightOutput.value = newHeight;
+                        } // otherwise keep existing
+                    };
+                    updateHeightOutput();
+                    heightInput.addEventListener('input', updateHeightOutput);
+                    heightInput.addEventListener('change', updateCanvas);
+
+                    const updateHeightIndicator = () => {
+                        let scale = img.clientHeight / imgHeight;
+                        heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
+                        heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
+                    };
+                    updateHeightIndicator();
+                    botSlider.addEventListener('input', () => {
+                        topSlider.value = Math.max(Number(botSlider.value) + 1, Number(topSlider.value));
+                        updateHeightIndicator();
+                        updateCanvas();
+                    });
+                    topSlider.addEventListener('input', () => {
+                        botSlider.value = Math.min(Number(botSlider.value), Number(topSlider.value) - 1);
+                        updateHeightIndicator();
+                        updateCanvas();
+                    });
+
+                    const updateMeasurementSliderWidths = () => {
+                        try {
+                            const newWidth = (200 * (Number(topEx.value) + Number(botEx.value) + 1)) + 'px';
+                            botSlider.style.width = newWidth;
+                            topSlider.style.width = newWidth;
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    };
+                    updateMeasurementSliderWidths();
+                    botEx.addEventListener('change', () => {
+                        let newMin = imgHeight * -botEx.value;
+                        botSlider.min = newMin;
+                        topSlider.min = newMin;
+                        updateMeasurementSliderWidths();
+                        updateHeightIndicator();
+                        updateCanvas(); // min and max must be updated before refreshing the canvas
+                    });
+                    topEx.addEventListener('change', () => {
+                        let newMax = imgHeight * topEx.value + imgHeight;
+                        botSlider.max = newMax;
+                        topSlider.max = newMax;
+                        updateMeasurementSliderWidths();
+                        updateHeightIndicator();
+                        updateCanvas(); // min and max must be updated before refreshing the canvas
+                    });
+
+                    shiftSlider.addEventListener('input', () => {
+                        const shiftM = Number(shiftSlider.value);
+                        const shiftPx = shiftM * scale;
+                        cimg.style.left = shiftPx + 'px';
+                    });
+
+                    orderSlider.addEventListener('change', () => {
+                        const order = Number(orderSlider.value);
+                        cimg.style.zIndex = order - 1;
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+
+            characters.addEventListener('change', () => {
                 try {
                     let files = characters.files;
-                    if (files !== null) {
-                        for (const file of files) {
-                            const fileURL = URL.createObjectURL(file);
-
-                            const container = document.createElement('div');
-                            container.classList.add('container');
-                            inputs.appendChild(container);
-
-                            const img = document.createElement('img');
-                            img.src = fileURL;
-                            container.appendChild(img);
-
-                            const cimg = document.createElement('img');
-                            cimg.src = fileURL;
-                            canvas.appendChild(cimg);
-
-                            const heightIndicator = document.createElement('div');
-                            heightIndicator.classList.add('height-indicator');
-                            container.appendChild(heightIndicator);
-
-                            // Wait for the img to load so image data is ready
-                            await new Promise((resolve) => img.addEventListener('load', resolve));
-
-                            heightIndicator.style.width = `${img.clientWidth}px`;
-
-                            const imgHeight = img.naturalHeight;
-                            const imgWidth = img.naturalWidth;
-
-                            const fieldset = document.createElement('fieldset');
-
-                            const topSliderLabel = document.createElement('label');
-                            topSliderLabel.htmlFor = 'top-slider';
-                            topSliderLabel.textContent = 'top of measurement';
-                            fieldset.appendChild(topSliderLabel);
-
-                            const topSlider = document.createElement('input');
-                            topSlider.type = 'range';
-                            topSlider.min = 0.0;
-                            topSlider.max = imgHeight;
-                            topSlider.value = imgHeight;
-                            topSlider.name = 'top-slider';
-                            topSlider.classList.add('top-slider');
-                            topSliderLabel.appendChild(topSlider);
-
-                            const botSliderLabel = document.createElement('label');
-                            botSliderLabel.htmlFor = 'bot-slider';
-                            botSliderLabel.textContent = 'bottom of measurement';
-                            fieldset.appendChild(botSliderLabel);
-
-                            const botSlider = document.createElement('input');
-                            botSlider.type = 'range';
-                            botSlider.min = 0.0;
-                            botSlider.max = imgHeight;
-                            botSlider.value = 0.0;
-                            botSlider.name = 'bot-slider';
-                            botSlider.classList.add('bot-slider');
-                            botSliderLabel.appendChild(botSlider);
-
-                            const topExLabel = document.createElement('label');
-                            topExLabel.htmlFor = 'top-ex';
-                            topExLabel.textContent = 'top extension';
-                            fieldset.appendChild(topExLabel);
-
-                            const topEx = document.createElement('input');
-                            topEx.type = 'number';
-                            topEx.min = 0.0;
-                            topEx.value = 0.0;
-                            topEx.name = 'top-ex';
-                            topEx.classList.add('top-ex');
-                            topExLabel.appendChild(topEx);
-
-                            const botExLabel = document.createElement('label');
-                            botExLabel.htmlFor = 'bot-ex';
-                            botExLabel.textContent = 'bottom extension';
-                            fieldset.appendChild(botExLabel);
-
-                            const botEx = document.createElement('input');
-                            botEx.type = 'number';
-                            botEx.min = 0.0;
-                            botEx.value = 0.0;
-                            botEx.name = 'bot-ex';
-                            botEx.classList.add('bot-ex');
-                            botExLabel.appendChild(botEx);
-
-                            const shiftSliderLabel = document.createElement('label');
-                            shiftSliderLabel.htmlFor = 'shift-slider';
-                            shiftSliderLabel.textContent = 'horizontal offset';
-                            fieldset.appendChild(shiftSliderLabel);
-
-                            const shiftSlider = document.createElement('input');
-                            shiftSlider.type = 'range';
-                            shiftSlider.min = 0.0;
-                            shiftSlider.value = 0.0;
-                            shiftSlider.max = 0.0;
-                            shiftSlider.step = 0.0001;
-                            shiftSlider.name = 'shift-slider';
-                            shiftSlider.classList.add('shift-slider');
-                            shiftSliderLabel.appendChild(shiftSlider);
-
-                            const orderSliderLabel = document.createElement('label');
-                            orderSliderLabel.htmlFor = 'order-slider';
-                            orderSliderLabel.textContent = 'order';
-                            fieldset.appendChild(orderSliderLabel);
-
-                            const orderSlider = document.createElement('input');
-                            orderSlider.type = 'number';
-                            orderSlider.value = 0;
-                            orderSlider.name = 'order-slider';
-                            orderSlider.classList.add('order-slider');
-                            orderSliderLabel.appendChild(orderSlider);
-
-                            const heightLabel = document.createElement('label');
-                            heightLabel.htmlFor = 'height';
-                            heightLabel.textContent = 'height';
-                            fieldset.appendChild(heightLabel);
-
-                            const heightInput = document.createElement('input');
-                            heightInput.type = 'text';
-                            heightInput.min = 0;
-                            heightInput.value = `5'9"`;
-                            heightInput.name = 'height';
-                            heightInput.classList.add('height-input');
-                            heightLabel.appendChild(heightInput);
-
-                            const heightOutput = document.createElement('output');
-                            heightOutput.type = 'number';
-                            heightOutput.classList.add('height-output');
-                            fieldset.appendChild(heightOutput);
-
-                            const pxGroupIdName = `px-group${inputs.childElementCount - 1}`;
-
-                            const pxGroupLabel = document.createElement('label');
-                            pxGroupLabel.htmlFor = pxGroupIdName;
-                            pxGroupLabel.textContent = 'pixel group';
-                            fieldset.appendChild(pxGroupLabel);
-
-                            const pxGroupContainer = document.createElement('div');
-                            pxGroupContainer.classList.add("px-group-container")
-
-                            for (let i = 0; i < 8; ++i) {
-                                const pxGroup = document.createElement('input');
-                                pxGroup.type = 'radio';
-                                pxGroup.value = i;
-                                pxGroup.name = pxGroupIdName;
-                                pxGroup.classList.add('px-group');
-                                if (i === 0) {
-                                    pxGroup.checked = true;
-                                }
-                                pxGroupContainer.appendChild(pxGroup);
-                            }
-
-                            pxGroupLabel.appendChild(pxGroupContainer);
-
-                            const removeButton = document.createElement('button');
-                            removeButton.textContent = 'remove';
-                            removeButton.class = 'remover';
-                            fieldset.appendChild(removeButton);
-
-                            container.appendChild(fieldset);
-
-                            removeButton.addEventListener('click', () => {
-                                cimg.remove();
-                                container.remove();
-                            });
-
-                            const updateHeightOutput = () => {
-                                let newHeight = stom(heightInput.value);
-                                if (newHeight === "px") {
-                                    heightOutput.value = "?";
-                                } else if (newHeight !== null) {
-                                    heightOutput.value = newHeight;
-                                }
-                            };
-                            updateHeightOutput();
-                            heightInput.addEventListener('input', updateHeightOutput);
-
-                            const updateHeightIndicator = () => {
-                                let scale = img.clientHeight / imgHeight;
-                                heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
-                                heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
-                            };
-                            updateHeightIndicator();
-                            botSlider.addEventListener('input', () => {
-                                topSlider.value = Math.max(Number(botSlider.value) + 1, Number(topSlider.value));
-                                updateHeightIndicator();
-                            });
-                            topSlider.addEventListener('input', () => {
-                                botSlider.value = Math.min(Number(botSlider.value), Number(topSlider.value) - 1);
-                                updateHeightIndicator();
-                            });
-
-                            const updateMeasurementSliderWidths = () => {
-                                try {
-                                    const newWidth = (200 * (Number(topEx.value) + Number(botEx.value) + 1)) + 'px';
-                                    botSlider.style.width = newWidth;
-                                    topSlider.style.width = newWidth;
-                                } catch (e) {
-                                    console.error(e);
-                                }
-                            };
-                            updateMeasurementSliderWidths();
-                            botEx.addEventListener('change', () => {
-                                let newMin = imgHeight * -botEx.value;
-                                botSlider.min = newMin;
-                                topSlider.min = newMin;
-                                updateMeasurementSliderWidths();
-                                updateHeightIndicator();
-                                updateCanvas(); // min and max must be updated before refreshing the canvas
-                            });
-                            topEx.addEventListener('change', () => {
-                                let newMax = imgHeight * topEx.value + imgHeight;
-                                botSlider.max = newMax;
-                                topSlider.max = newMax;
-                                updateMeasurementSliderWidths();
-                                updateHeightIndicator();
-                                updateCanvas(); // min and max must be updated before refreshing the canvas
-                            });
-
-                            shiftSlider.addEventListener('input', () => {
-                                const shiftM = Number(shiftSlider.value);
-                                const shiftPx = shiftM * scale;
-                                cimg.style.left = shiftPx + 'px';
-                            });
-
-                            orderSlider.addEventListener('change', () => {
-                                const order = Number(orderSlider.value);
-                                cimg.style.zIndex = order - 1;
-                            });
-
-                            // rule: parsed field -> change, slider -> input
-                            topSlider.addEventListener('input', updateCanvas);
-                            botSlider.addEventListener('input', updateCanvas);
-                            heightInput.addEventListener('change', updateCanvas);
-                            pxGroupContainer.addEventListener('change', updateCanvas);
-                            removeButton.addEventListener('click', updateCanvas);
-                            updateCanvas();
-                        }
+                    if (files === null) {
+                        return;
                     }
+                    let promises = Array.from(files).map((file) => addCharacter(URL.createObjectURL(file)));
+                    Promise.all(promises).then(updateCanvas); // update in bulk after all `addCharacter`s have completed
                 } catch (e) {
                     console.error(e);
                 }
