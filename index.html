@@ -668,6 +668,9 @@
                         }
                     } else {
                         for (let i = meterstick.childElementCount; i >= Math.floor(tallestM); --i) {
+                            if (meterstick.firstElementChild === null) {
+                                break;
+                            }
                             meterstick.removeChild(meterstick.firstElementChild);
                         }
                         const TEXT_CUTOFF = 44;
