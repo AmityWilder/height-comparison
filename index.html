@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="--bg-color: #ffffff; --accent-color: red;">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +7,10 @@
         <link rel="shortcut icon" href="favicon.ico" />
         <title>Amy's Height Comparer</title>
         <style>
+            body {
+                background-color: var(--bg-color);
+                color: contrast-color(var(--bg-color));
+            }
             input#scale::after {
                 content: 'px';
             }
@@ -68,7 +72,7 @@
                     bottom: 0;
                     position: absolute;
                     td {
-                        border-top: 1px solid rgb(255 0 0 / 33%);
+                        border-top: 1px solid var(--accent-color);
                         width: 100%;
                         overflow: clip;
                         padding: 0;
@@ -262,12 +266,20 @@
         </details>
         <label>
             canvas height (px)
-            <input type="number" id="scale" min="0" value="1024" step="1" name="scale" />
+            <input type="number" id="scale" min="0" value="1024" step="1" />
+        </label>
+        <label>
+            background color
+            <input type="color" id="bg-color" />
+        </label>
+        <label>
+            accent color
+            <input type="color" id="accent-color" />
         </label>
         <br />
         <label>
             add a character
-            <input type="file" id="characters" name="characters" accept="image/*" multiple />
+            <input type="file" id="characters" accept="image/*" multiple />
         </label>
         <div id="inputs"></div>
         <div id="canvas">
@@ -430,6 +442,10 @@
             const characters = document.getElementById('characters');
             /** @type {HTMLInputElement} */
             const scaleInput = document.getElementById('scale');
+            /** @type {HTMLInputElement} */
+            const bgColor = document.getElementById('bg-color');
+            /** @type {HTMLInputElement} */
+            const accentColor = document.getElementById('accent-color');
             /** @type {HTMLDivElement} */
             const inputs = document.getElementById('inputs');
             /** @type {HTMLDivElement} */
@@ -438,6 +454,18 @@
             const meterstick = document.getElementById('meterstick');
 
             const PIXEL_GROUP_COUNT = 8;
+
+            bgColor.value = "#ffffff";
+            bgColor.addEventListener('input', () => {
+                document.documentElement.style.setProperty('--bg-color', bgColor.value);
+            });
+            bgColor.select();
+
+            accentColor.value = "red";
+            accentColor.addEventListener('input', () => {
+                document.documentElement.style.setProperty('--accent-color', accentColor.value);
+            });
+            accentColor.select();
 
             let prevTallest = 0;
             /** @type {number} */
