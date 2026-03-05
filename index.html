@@ -437,7 +437,9 @@
             /** @type {HTMLTableElement} */
             const meterstick = document.getElementById('meterstick');
 
+            /** @type {number} */
             let prevTallest = 0;
+            /** @type {number} */
             let scale;
 
             const updateCanvas = () => {
@@ -445,7 +447,11 @@
                     const inputContainers = inputs.getElementsByClassName('container');
                     const canvasItems = canvas.getElementsByTagName('img');
                     if (inputContainers.length === 0) {
+                        // no work to do
                         return;
+                    }
+                    if (inputContainers.length !== canvasItems.length) {
+                        console.error(`miscount detected: ${inputContainers.length} inputContainers != ${canvasItems.length} canvasItems`);
                     }
                     // from bottom of measurement to top of canvas image
 
@@ -652,7 +658,7 @@
                         // console.groupEnd();
                     }
                     // console.log("heights (m):", heightsM);
-                    const tallestM = Math.max(...heightsM);
+                    const tallestM = Math.max(0, ...heightsM);
                     // console.log("canvas height (m):", tallest);
                     const canvasHeightPx = Number(scaleInput.value);
                     // console.log("canvas height (px):", outHeight);
@@ -876,6 +882,28 @@
                             heightOutput.type = 'number';
                             heightOutput.classList.add('height-output');
                             fieldset.appendChild(heightOutput);
+
+                            const filteringLabel = document.createElement('label');
+                            filteringLabel.htmlFor = 'filtering-checkbox';
+                            filteringLabel.textContent = 'filtering';
+                            fieldset.appendChild(filteringLabel);
+
+                            const filteringCheckbox = document.createElement('input');
+                            filteringCheckbox.type = 'checkbox';
+                            filteringCheckbox.checked = imgHeight > 400;
+                            filteringCheckbox.name = 'filtering';
+                            filteringCheckbox.classList.add('filtering-checkbox');
+                            filteringLabel.appendChild(filteringCheckbox);
+
+                            const updateFiltering = () => {
+                                const rendering = filteringCheckbox.checked
+                                    ? 'auto'
+                                    : 'pixelated';
+                                img.style.imageRendering = rendering;
+                                cimg.style.imageRendering = rendering;
+                            };
+                            filteringCheckbox.addEventListener('input', updateFiltering);
+                            updateFiltering();
 
                             const pxGroupIdName = `px-group${inputs.childElementCount - 1}`;
 
