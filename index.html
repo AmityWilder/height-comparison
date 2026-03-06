@@ -434,7 +434,7 @@
                     } else if (arr.groups['oz'] !== undefined) { // ounces
                         total += 0.02835 * qty;
                     } else if (arr.groups['m'] !== undefined) { // metric (or imperial tons)
-                        const unit = arr.groups['us'] ?? arr.groups['ul']; // suffix
+                        const unit = arr.groups['us'] ?? arr.groups['ul'];
                         if (/^tons?$/.test(unit) && arr.groups['tm'] === undefined) { // imperial tons
                             total += 907.18474 * qty;
                         } else {
