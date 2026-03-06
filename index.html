@@ -286,9 +286,97 @@
         </div>
 
         <script>
+            /**
+             * Convert a metric prefix to a multiplier.
+             * Returns `null` if invalid prefix.
+             * @param {string} prefix
+             * @returns {number|null}
+             */
+            const prefixMultiplier = (prefix) => {
+                switch (prefix) {
+                    case 'quetta':
+                    case 'Q':
+                        return 1e30;
+                    case 'ronna':
+                    case 'R':
+                        return 1e27;
+                    case 'yotta':
+                    case 'Y':
+                        return 1e24;
+                    case 'zetta':
+                    case 'Z':
+                        return 1e21;
+                    case 'exa':
+                    case 'E':
+                        return 1e18;
+                    case 'peta':
+                    case 'P':
+                        return 1e15;
+                    case 'tera':
+                    case 'T':
+                        return 1e12;
+                    case 'giga':
+                    case 'G':
+                        return 1e9;
+                    case 'mega':
+                    case 'M':
+                        return 1e6;
+                    case 'kilo':
+                    case 'k':
+                        return 1e3;
+                    case 'hecto':
+                    case 'h':
+                        return 1e2;
+                    case 'deca':
+                    case 'deka':
+                    case 'da':
+                        return 1e1;
+                    case '':
+                        return 1;
+                    case 'deci':
+                    case 'd':
+                        return 1e-1;
+                    case 'centi':
+                    case 'c':
+                        return 1e-2;
+                    case 'milli':
+                    case 'm':
+                        return 1e-3;
+                    case 'micro':
+                    case 'μ':
+                        return 1e-6;
+                    case 'nano':
+                    case 'n':
+                        return 1e-9;
+                    case 'pico':
+                    case 'p':
+                        return 1e-12;
+                    case 'femto':
+                    case 'f':
+                        return 1e-15;
+                    case 'atto':
+                    case 'a':
+                        return 1e-18;
+                    case 'zepto':
+                    case 'z':
+                        return 1e-21;
+                    case 'yocto':
+                    case 'y':
+                        return 1e-24;
+                    case 'ronto':
+                    case 'r':
+                        return 1e-27;
+                    case 'quecto':
+                    case 'q':
+                        return 1e-30;
+                    default: // what is a "michaelmeter"?
+                        return null;
+                }
+            };
+
             // NOT case-insensitive!! Consider mm (millimeters) vs Mm (megameters)
             const stomRe =
-                /(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<ft>(?:f(?:oo|ee)?t|'))|(?<in>in(?:ch(?:es)?)?|\")|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)met(?:er|re)s?)|(?<mi>mi(?:les?)?)|(?<ly>lightyears?|ly))/gy;
+                /\s*(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<ft>f(?:oo|ee)?t|')|(?<in>in(?:ch(?:es)?)?|\")|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)met(?:er|re)s?)|(?<mi>mi(?:les?)?)|(?<ly>lightyears?|ly))\b/yg;
             /**
              * Convert a string to meters.
              * Returns `null` if invalid measurement.
@@ -296,9 +384,7 @@
              * @returns {number|"px"|null}
              */
             const stom = (s) => {
-                if (s === "px") {
-                    return "px";
-                }
+                if (s === "px") return "px";
                 let total = 0;
                 let arr;
                 while ((arr = stomRe.exec(s)) !== null) {
@@ -310,112 +396,8 @@
                     } else if (arr.groups['in'] !== undefined) { // inches
                         total += 0.0254 * qty;
                     } else if (arr.groups['m'] !== undefined) { // metric
-                        const metricPrefix = arr.groups['ps'] ?? arr.groups['pl'];
-                        let multiplier;
-                        switch (metricPrefix) {
-                            case 'quetta':
-                            case 'Q':
-                                multiplier = 1e30;
-                                break;
-                            case 'ronna':
-                            case 'R':
-                                multiplier = 1e27;
-                                break;
-                            case 'yotta':
-                            case 'Y':
-                                multiplier = 1e24;
-                                break;
-                            case 'zetta':
-                            case 'Z':
-                                multiplier = 1e21;
-                                break;
-                            case 'exa':
-                            case 'E':
-                                multiplier = 1e18;
-                                break;
-                            case 'peta':
-                            case 'P':
-                                multiplier = 1e15;
-                                break;
-                            case 'tera':
-                            case 'T':
-                                multiplier = 1e12;
-                                break;
-                            case 'giga':
-                            case 'G':
-                                multiplier = 1e9;
-                                break;
-                            case 'mega':
-                            case 'M':
-                                multiplier = 1e6;
-                                break;
-                            case 'kilo':
-                            case 'k':
-                                multiplier = 1e3;
-                                break;
-                            case 'hecto':
-                            case 'h':
-                                multiplier = 1e2;
-                                break;
-                            case 'deca':
-                            case 'deka':
-                            case 'da':
-                                multiplier = 1e1;
-                                break;
-                            case '':
-                                multiplier = 1;
-                                break;
-                            case 'deci':
-                            case 'd':
-                                multiplier = 1e-1;
-                                break;
-                            case 'centi':
-                            case 'c':
-                                multiplier = 1e-2;
-                                break;
-                            case 'milli':
-                            case 'm':
-                                multiplier = 1e-3;
-                                break;
-                            case 'micro':
-                            case 'μ':
-                                multiplier = 1e-6;
-                                break;
-                            case 'nano':
-                            case 'n':
-                                multiplier = 1e-9;
-                                break;
-                            case 'pico':
-                            case 'p':
-                                multiplier = 1e-12;
-                                break;
-                            case 'femto':
-                            case 'f':
-                                multiplier = 1e-15;
-                                break;
-                            case 'atto':
-                            case 'a':
-                                multiplier = 1e-18;
-                                break;
-                            case 'zepto':
-                            case 'z':
-                                multiplier = 1e-21;
-                                break;
-                            case 'yocto':
-                            case 'y':
-                                multiplier = 1e-24;
-                                break;
-                            case 'ronto':
-                            case 'r':
-                                multiplier = 1e-27;
-                                break;
-                            case 'quecto':
-                            case 'q':
-                                multiplier = 1e-30;
-                                break;
-                            default: // what is a "michaelmeter"?
-                                return null;
-                        }
+                        const multiplier = prefixMultiplier(arr.groups['ps'] ?? arr.groups['pl']);
+                        if (multiplier === null) return null; // unknown multiplier; entire measurement jeopardized
                         total += multiplier * qty;
                     } else if (arr.groups['mi'] !== undefined) { // miles
                         total += 1_609 * qty;
@@ -428,8 +410,9 @@
                 return total > 0 ? total : null; // height cannot be 0 or negative
             };
 
-            // const stokgRe =
-            //     /^(?:(?<kg>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)) ?(?:kg|kilogram(?:me)?s?))$/;
+            // NOT case-insensitive!! Consider mm (milligrams) vs Mm (megagrams)
+            const stokgRe =
+                /\s*(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<lb>pounds?|lbs?)|(?<oz>ounces?)|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)(?<us>g|t)|(?<tm>metric )?(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)(?<ul>gram(?:me)?s?|ton(?:ne)?s?))|(?<tn>tn))\b/yg;
             /**
              * Convert a string to kilograms.
              * Returns `null` if invalid measurement.
@@ -437,7 +420,35 @@
              * @returns {number|null}
              */
             const stokg = (s) => {
-
+                let total = 0;
+                let arr;
+                while ((arr = stokgRe.exec(s)) !== null) {
+                    const qty = Number(arr.groups['qty'].replace(',', '').replace(' ', ''));
+                    if (isNaN(qty)) { // invalid quantity; entire measurement jeopardized
+                        return null;
+                    } else if (arr.groups['lb'] !== undefined) { // pound
+                        total += 0.4536 * qty;
+                    } else if (arr.groups['oz'] !== undefined) { // ounces
+                        total += 0.02835 * qty;
+                    } else if (arr.groups['m'] !== undefined) { // metric (or imperial tons)
+                        const unit = arr.groups['us'] ?? arr.groups['ul']; // suffix
+                        if (/^tons?$/.test(unit) && arr.groups['tm'] === undefined) { // imperial tons
+                            total += 907.18474 * qty;
+                        } else {
+                            const base = unit.startsWith('g')
+                                ? 1     // grams
+                                : 1000; // metric tons
+                            const multiplier = prefixMultiplier(arr.groups['ps'] ?? arr.groups['pl']);
+                            if (multiplier === null) return null; // unknown multiplier; entire measurement jeopardized
+                            total += base * multiplier * qty;
+                        }
+                    } else if (arr.groups['tn'] !== undefined) { // imperial tons
+                        total += 907.18474 * qty;
+                    } else { // unknown unit; entire measurement jeopardized
+                        return null;
+                    }
+                }
+                return total > 0 ? total : null; // height cannot be 0 or negative
             };
 
             /** @type {HTMLInputElement} */
