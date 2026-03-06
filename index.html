@@ -44,7 +44,7 @@
                                 display: block;
                             }
                         }
-                        output.height-output::after {
+                        output.height-output::after, output.width-output::after {
                             content: 'm';
                         }
                         output.mass-output::after {
@@ -415,7 +415,7 @@
 
             // NOT case-insensitive!! Consider mm (milligrams) vs Mm (megagrams)
             const stokgRe =
-                /\s*(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<lb>pounds?|lbs?)|(?<oz>ounces?)|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)(?<us>g|t)|(?<tm>metric )?(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)(?<ul>gram(?:me)?s?|ton(?:ne)?s?))|(?<tn>tn))\b/yg;
+                /\s*(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<lb>pounds?|lbs?)|(?<oz>ounces?)|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)(?<us>g|t)|(?<tm>m(?:\.|etric) )?(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)(?<ul>gram(?:me)?s?|ton(?:ne)?s?))|(?<tn>tn))\b/yg;
             /**
              * Convert a string to kilograms.
              * Returns `null` if invalid measurement.
@@ -798,33 +798,6 @@
                     rightSlider.classList.add('right-slider');
                     rightSliderLabel.appendChild(rightSlider);
 
-                    const updateHeightIndicator = () => {
-                        let scale = img.clientHeight / imgHeight;
-                        heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
-                        heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
-                        heightIndicator.style.left = `${(leftSlider.value) * scale}px`;
-                        heightIndicator.style.width = `${(rightSlider.value - leftSlider.value) * scale}px`;
-                    };
-                    updateHeightIndicator();
-                    botSlider.addEventListener('input', () => {
-                        topSlider.value = Math.max(Number(botSlider.value) + 1, Number(topSlider.value));
-                        updateHeightIndicator();
-                        updateCanvas();
-                    });
-                    topSlider.addEventListener('input', () => {
-                        botSlider.value = Math.min(Number(botSlider.value), Number(topSlider.value) - 1);
-                        updateHeightIndicator();
-                        updateCanvas();
-                    });
-                    leftSlider.addEventListener('input', () => {
-                        rightSlider.value = Math.max(Number(leftSlider.value) + 1, Number(rightSlider.value));
-                        updateHeightIndicator();
-                    });
-                    rightSlider.addEventListener('input', () => {
-                        leftSlider.value = Math.min(Number(leftSlider.value), Number(rightSlider.value) - 1);
-                        updateHeightIndicator();
-                    });
-
                     const topExLabel = document.createElement('label');
                     topExLabel.textContent = 'top extension';
                     fieldset.appendChild(topExLabel);
@@ -885,20 +858,62 @@
                     heightOutput.classList.add('height-output');
                     fieldset.appendChild(heightOutput);
 
+                    const widthOutput = document.createElement('output');
+                    widthOutput.type = 'number';
+                    widthOutput.classList.add('width-output');
+                    fieldset.appendChild(widthOutput);
+
+                    const updateWidthOutput = () => {
+                        const measureHeight = Number(topSlider.value) - Number(botSlider.value);
+                        const measureWidth = Number(rightSlider.value) - Number(leftSlider.value);
+                        widthOutput.value = measureWidth * Number(heightOutput.value) / measureHeight;
+                    };
                     const updateHeightOutput = () => {
                         let newHeight = stom(heightInput.value);
                         if (newHeight === "px") {
                             heightOutput.value = "?";
                         } else if (newHeight !== null) {
                             heightOutput.value = newHeight;
+                            updateWidthOutput();
                         } // otherwise keep existing
                     };
                     updateHeightOutput();
+
+                    const updateHeightIndicator = () => {
+                        let scale = img.clientHeight / imgHeight;
+                        heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
+                        heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
+                        heightIndicator.style.left = `${(leftSlider.value) * scale}px`;
+                        heightIndicator.style.width = `${(rightSlider.value - leftSlider.value) * scale}px`;
+                    };
+                    updateHeightIndicator();
+                    botSlider.addEventListener('input', () => {
+                        topSlider.value = Math.max(Number(botSlider.value) + 1, Number(topSlider.value));
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                        updateCanvas();
+                    });
+                    topSlider.addEventListener('input', () => {
+                        botSlider.value = Math.min(Number(botSlider.value), Number(topSlider.value) - 1);
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                        updateCanvas();
+                    });
+                    leftSlider.addEventListener('input', () => {
+                        rightSlider.value = Math.max(Number(leftSlider.value) + 1, Number(rightSlider.value));
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                    });
+                    rightSlider.addEventListener('input', () => {
+                        leftSlider.value = Math.min(Number(leftSlider.value), Number(rightSlider.value) - 1);
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                    });
                     heightInput.addEventListener('input', updateHeightOutput);
                     heightInput.addEventListener('change', updateCanvas);
 
                     const massLabel = document.createElement('label');
-                    massLabel.textContent = 'mass';
+                    massLabel.textContent = 'mass/weight';
                     fieldset.appendChild(massLabel);
 
                     const massInput = document.createElement('input');
