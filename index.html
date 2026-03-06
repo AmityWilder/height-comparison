@@ -44,8 +44,11 @@
                                 display: block;
                             }
                         }
-                        output::after {
+                        output.height-output::after {
                             content: 'm';
+                        }
+                        output.mass-output::after {
+                            content: 'kg';
                         }
                         .px-group-container {
                             display: flex;
@@ -436,8 +439,8 @@
                             total += 907.18474 * qty;
                         } else {
                             const base = unit.startsWith('g')
-                                ? 1     // grams
-                                : 1000; // metric tons
+                                ? 0.001  // grams (1/1000kg)
+                                : 1_000; // metric tons (1000kg)
                             const multiplier = prefixMultiplier(arr.groups['ps'] ?? arr.groups['pl']);
                             if (multiplier === null) return null; // unknown multiplier; entire measurement jeopardized
                             total += base * multiplier * qty;
@@ -882,6 +885,18 @@
                     heightOutput.classList.add('height-output');
                     fieldset.appendChild(heightOutput);
 
+                    const updateHeightOutput = () => {
+                        let newHeight = stom(heightInput.value);
+                        if (newHeight === "px") {
+                            heightOutput.value = "?";
+                        } else if (newHeight !== null) {
+                            heightOutput.value = newHeight;
+                        } // otherwise keep existing
+                    };
+                    updateHeightOutput();
+                    heightInput.addEventListener('input', updateHeightOutput);
+                    heightInput.addEventListener('change', updateCanvas);
+
                     const massLabel = document.createElement('label');
                     massLabel.textContent = 'mass';
                     fieldset.appendChild(massLabel);
@@ -896,6 +911,15 @@
                     massOutput.type = 'number';
                     massOutput.classList.add('mass-output');
                     fieldset.appendChild(massOutput);
+
+                    const updateMassOutput = () => {
+                        let newMass = stokg(massInput.value);
+                        if (newMass !== null) {
+                            massOutput.value = newMass;
+                        } // otherwise keep existing
+                    };
+                    updateMassOutput();
+                    massInput.addEventListener('input', updateMassOutput);
 
                     const filteringLabel = document.createElement('label');
                     filteringLabel.textContent = 'filtering';
@@ -952,18 +976,6 @@
                         cimg.remove();
                         container.remove();
                     });
-
-                    const updateHeightOutput = () => {
-                        let newHeight = stom(heightInput.value);
-                        if (newHeight === "px") {
-                            heightOutput.value = "?";
-                        } else if (newHeight !== null) {
-                            heightOutput.value = newHeight;
-                        } // otherwise keep existing
-                    };
-                    updateHeightOutput();
-                    heightInput.addEventListener('input', updateHeightOutput);
-                    heightInput.addEventListener('change', updateCanvas);
 
                     const updateMeasurementSliderWidths = () => {
                         try {
