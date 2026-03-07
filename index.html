@@ -379,7 +379,7 @@
 
             // NOT case-insensitive!! Consider mm (millimeters) vs Mm (megameters)
             const stomRe =
-                /\s*(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<ft>f(?:oo|ee)?t|')|(?<in>in(?:ch(?:es)?)?|\")|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)met(?:er|re)s?)|(?<mi>mi(?:les?)?)|(?<ly>lightyears?|ly))\b/yg;
+                /\s*(?<qty>(?:\d+|\d{1,3}(?:[,_ ]\d{3})+)(?:\.(?:\d+|(?:\d{3}[_ ])+\d{1,3}))?)\s*(?:(?<ft>f(?:oo|ee)?t\b|')|(?<in>in(?:ch(?:es)?)?\b|")|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)m|(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)met(?:er|re)s?)\b|(?<mi>mi(?:les?)?)\b|(?<ly>lightyears?|ly)\b|(?<nil>$))/yg;
             /**
              * Convert a string to meters.
              * Returns `null` if invalid measurement.
@@ -390,23 +390,32 @@
                 if (s === "px") return "px";
                 let total = 0;
                 let arr;
+                let has_feet = false;
                 while ((arr = stomRe.exec(s)) !== null) {
                     const qty = Number(arr.groups['qty'].replace(',', '').replace(' ', ''));
                     if (isNaN(qty)) { // invalid quantity; entire measurement jeopardized
+                        console.log("invalid quantity");
                         return null;
                     } else if (arr.groups['ft'] !== undefined) { // feet
+                        console.log("feet");
+                        has_feet = true;
                         total += 0.3048 * qty;
-                    } else if (arr.groups['in'] !== undefined) { // inches
+                    } else if (arr.groups['in'] !== undefined || has_feet && (arr.groups['nil'] !== undefined)) { // inches
+                        console.log("inches | " + ((arr.groups['in'] !== undefined) ? "ex" : "im") + "plicit");
                         total += 0.0254 * qty;
                     } else if (arr.groups['m'] !== undefined) { // metric
+                        console.log("metric");
                         const multiplier = prefixMultiplier(arr.groups['ps'] ?? arr.groups['pl']);
                         if (multiplier === null) return null; // unknown multiplier; entire measurement jeopardized
                         total += multiplier * qty;
                     } else if (arr.groups['mi'] !== undefined) { // miles
+                        console.log("miles");
                         total += 1_609 * qty;
                     } else if (arr.groups['ly'] !== undefined) { // lightyears
+                        console.log("lightyears");
                         total += 9_460_730_472_580_800 * qty;
                     } else { // unknown unit; entire measurement jeopardized
+                        console.log("unknown");
                         return null;
                     }
                 }
@@ -415,7 +424,7 @@
 
             // NOT case-insensitive!! Consider mg (milligrams) vs Mg (megagrams)
             const stokgRe =
-                /\s*(?<qty>(?:\d+|\d{1,3}(?:[, ]\d{3})+)(?:\.(?:\d+|(?:\d{3} )+\d{1,3}))?)\s*(?:(?<lb>pounds?|lbs?)|(?<oz>ounces?)|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)(?<us>g|t)|(?<tm>m(?:\.|etric) )?(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)(?<ul>gram(?:me)?s?|ton(?:ne)?s?))|(?<tn>tn))\b/yg;
+                /\s*(?<qty>(?:\d+|\d{1,3}(?:[,_ ]\d{3})+)(?:\.(?:\d+|(?:\d{3}[_ ])+\d{1,3}))?)\s*(?:(?<lb>pounds?|lbs?)|(?<oz>ounces?|oz)|(?<m>(?<ps>da|[QRYZEPTGMkhdcmμnpfazyrq]|)(?<us>g|t)|(?<tm>m(?:\.|etric) )?(?<pl>quetta|ronna|yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|de[ck]a|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto|ronto|quecto|)(?<ul>gram(?:me)?s?|ton(?:ne)?s?))|(?<tn>tn))\b/yg;
             /**
              * Convert a string to kilograms.
              * Returns `null` if invalid measurement.
