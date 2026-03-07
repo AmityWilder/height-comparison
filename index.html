@@ -384,38 +384,31 @@
              * Convert a string to meters.
              * Returns `null` if invalid measurement.
              * @param {string} s
-             * @returns {number|"px"|null}
+             * @returns {number|null}
              */
             const stom = (s) => {
-                if (s === "px") return "px";
                 let total = 0;
                 let arr;
                 let has_feet = false;
+                stomRe.lastIndex = 0;
                 while ((arr = stomRe.exec(s)) !== null) {
                     const qty = Number(arr.groups['qty'].replace(',', '').replace(' ', ''));
                     if (isNaN(qty)) { // invalid quantity; entire measurement jeopardized
-                        console.log("invalid quantity");
                         return null;
                     } else if (arr.groups['ft'] !== undefined) { // feet
-                        console.log("feet");
                         has_feet = true;
                         total += 0.3048 * qty;
                     } else if (arr.groups['in'] !== undefined || has_feet && (arr.groups['nil'] !== undefined)) { // inches
-                        console.log("inches | " + ((arr.groups['in'] !== undefined) ? "ex" : "im") + "plicit");
                         total += 0.0254 * qty;
                     } else if (arr.groups['m'] !== undefined) { // metric
-                        console.log("metric");
                         const multiplier = prefixMultiplier(arr.groups['ps'] ?? arr.groups['pl']);
                         if (multiplier === null) return null; // unknown multiplier; entire measurement jeopardized
                         total += multiplier * qty;
                     } else if (arr.groups['mi'] !== undefined) { // miles
-                        console.log("miles");
                         total += 1_609 * qty;
                     } else if (arr.groups['ly'] !== undefined) { // lightyears
-                        console.log("lightyears");
                         total += 9_460_730_472_580_800 * qty;
                     } else { // unknown unit; entire measurement jeopardized
-                        console.log("unknown");
                         return null;
                     }
                 }
@@ -434,6 +427,7 @@
             const stokg = (s) => {
                 let total = 0;
                 let arr;
+                stokgRe.lastIndex = 0;
                 while ((arr = stokgRe.exec(s)) !== null) {
                     const qty = Number(arr.groups['qty'].replace(',', '').replace(' ', ''));
                     if (isNaN(qty)) { // invalid quantity; entire measurement jeopardized
@@ -878,18 +872,20 @@
                         widthOutput.value = measureWidth * Number(heightOutput.value) / measureHeight;
                     };
                     const updateHeightOutput = () => {
-                        let newHeight = stom(heightInput.value);
-                        if (newHeight === "px") {
-                            heightOutput.value = "?";
-                        } else if (newHeight !== null) {
-                            heightOutput.value = newHeight;
-                            updateWidthOutput();
-                        } // otherwise keep existing
+                        if (heightInput.value === "px") {
+                            heightOutput.value = "?"; // unknown
+                        } else {
+                            const newHeight = stom(heightInput.value);
+                            if (newHeight !== null) {
+                                heightOutput.value = newHeight;
+                                updateWidthOutput();
+                            } // otherwise keep existing
+                        }
                     };
                     updateHeightOutput();
 
                     const updateHeightIndicator = () => {
-                        let scale = img.clientHeight / imgHeight;
+                        const scale = img.clientHeight / imgHeight;
                         heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
                         heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
                         heightIndicator.style.left = `${(leftSlider.value) * scale}px`;
