@@ -48,10 +48,10 @@
                             }
                         }
                         output.height-output::after, output.width-output::after {
-                            content: 'm';
+                            content: ' m';
                         }
                         output.mass-output::after {
-                            content: 'kg';
+                            content: ' kg';
                         }
                         .px-group-container {
                             display: flex;
@@ -104,179 +104,245 @@
     <body>
         <details>
             <summary>help</summary>
-            <ol>
-                <li>
-                    <p>
-                        <strong>Click the "add a character" button and select 1 or more images.</strong><br/>
-                        You can do this as many times as needed until all subjects you want to compare are on the page.
-                    </p>
-                    <p>
-                        Note: Duplicate subjects <em>are</em> allowed.
-                        If you are trying to add a file with the same name as the previous one,
-                        your device may decide "that's the same file, I don't think you meant to do that" and refuse.
-                        If this happens, simply choose a different file, remove it, and add the first one again.
-                        Machines can be silly sometimes.
-                    </p>
-                    <p>
-                        Note 2: This website is entirely static.
-                        Your files will not be sent to a server; everything to do with your images is processed exclusively on your device.
-                        Once your browser has loaded the page, it does not require internet to work.
-                        If you don't believe me: this page is a single HTML file,
-                        you can save it (with ctrl+s or the right click menu) and use it offline.
-                        The page icon might not work though...
-                    </p>
-                </li>
-                <li>
-                    <p>
-                        <strong>Select the measurement area.</strong><br/>
-                        Drag the "top of measurement" slider to the left until the top line is at the top of the subject (typically the top of the head for humanoids/creatures).<br/>
-                        Drag the "bottom of measurement" slider to the right until the bottom line is at the bottom of the subject (typically the heels for humanoids/creatures).
-                    </p>
-                    <p>
-                        Note: the measurement does not <em>have</em> to be from heel to head.
-                        The "bottom of measurement" just needs to be the part of the subject that should be on the floor,
-                        and the "top of measurement" should be a point on the subject with a visible, straight, vertical distance from the
-                        "bottom of measurement". That distance must be indicated by the height.
-                    </p>
-                    <p>
-                        <strong>If the top/bottom of the measurement for the subject is not visible on the image, use the top/bottom extension.</strong><br/>
-                        1 extension = 1x the height of the image added to the upper/lower bound of the "top/bottom of measurement" sliders.
-                        More specifically, "top extension"=1 will add (upward) 1 image height to the upper bound,
-                        and "bottom extension"=1 will add (downward) 1 image height to the lower bound.
-                        Extensions can be increased until you feel there is sufficient room to measure the subject.
-                    </p>
-                    <p>
-                        This is useful when the image you want to use is not a fullbody.
-                    </p>
-                </li>
-                <li>
-                    <p>
-                        <strong>Measure your subjects.</strong><br/>
-                        If you know the height of your subject--or at least the part in the measurement area--input
-                        it to the "height" textbox. I programmed it to be <em>quite</em> flexible, so you don't have to worry about conversions
-                        unless you have a particularly unusual unit. If you have any suggestions, please let me know.
-                        <details><summary><strong>Supported units/formats</strong></summary>
-                            The height value can include any of the following unit names or abbreviations, with or without a space between the number and the unit.
-                            Units can be mixed, such as <span class="boxed">1mi 5ft 8mm</span>. Mixed units can be separated by commas, spaces, or "and" (Oxford comma is accepted and optional). If the measurement contains feet and ends with inches, the inches unit can be optionally excluded.
-                            Example: <span class="boxed">3'6"</span> can be expressed as <span class="boxed">3'6</span>.
-                            <br>
-                            <strong>Note:</strong> units <em>are</em> case-sensitive, as there is a meaningful distinction between "mm" (millimeters; 0.001 m) and "Mm" (megameters; 1,000,000 m).
-                            <p>
-                                Imperial
-                                <ul>
-                                    <li>mile(s), mi</li>
-                                    <li>foot, feet, ft, '</li>
-                                    <li>inch(es), in, "</li>
-                                </ul>
-                            </p>
-                            <p>
-                                Metric
-                                <ul>
-                                    <li>quettameter(s), Qm</li>
-                                    <li>ronnameter(s), Rm</li>
-                                    <li>yottameter(s), Ym</li>
-                                    <li>zettameter(s), Zm</li>
-                                    <li>exameter(s), Em</li>
-                                    <li>petameter(s), Pm</li>
-                                    <li>terameter(s), Tm</li>
-                                    <li>gigameter(s), Gm</li>
-                                    <li>megameter(s), Mm</li>
-                                    <li>kilometer(s), km</li>
-                                    <li>hectometer(s), hm</li>
-                                    <li>decameter(s), dekameter(s), dam</li>
-                                    <li>meter(s), m</li>
-                                    <li>decimeter(s), dm</li>
-                                    <li>centimeter(s), cm</li>
-                                    <li>millimeter(s), mm</li>
-                                    <li>micrometer(s), μm</li>
-                                    <li>nanometer(s), nm</li>
-                                    <li>picometer(s), pm</li>
-                                    <li>femtometer(s), fm</li>
-                                    <li>attometer(s), am</li>
-                                    <li>zeptometer(s), zm</li>
-                                    <li>yoctometer(s), ym</li>
-                                    <li>rontometer(s), rm</li>
-                                    <li>quectometer(s), qm</li>
-                                </ul>
-                            </p>
-                            <p>
-                                Other
-                                <ul>
-                                    <li>lightyear(s), ly</li>
-                                </ul>
-                            </p>
-                        </details>
-                    </p>
-                    <p>
-                        <strong>If you don't know the height of your subject,</strong>
-                        but you have another subject you <em>do</em> know the height of, and both have the same scale,
-                        (i.e. 1px in subject A = 1px in subject B; for example, both are from the same game and are screenshotted at the same level of zoom)
-                        put the unknown subject's height as "px" and make sure both subjects are in the same "pixel group".
-                    </p>
-                    <p>
-                        Pixel groups will use the average "local scale" (meters per pixel) of members with known height to calculate the heights
-                        of members with unknown ("px") heights. The calculated height will appear on the "output height" and will be automatically
-                        used to scale them as though their height is known. Use this feature if you have an in-game screenshot of a standardized
-                        bottle of diet coke and want to use it to determine how tall the protagonist is.
-                    </p>
-                </li>
-                <li>
-                    <p>
-                        <strong>Organize your subjects.</strong><br/>
-                    </p>
+            <section id="canvas-height-help">
+                <strong>canvas height</strong>
+                <p>
+                    How tall the base canvas should be in pixels.
+                    The canvas is scaled so that the tallest character is this tall in pixels,
+                    defining how tall 1 meter should be when displayed on the canvas.
+                </p>
+            </section>
+            <section id="background-color-help">
+                <strong>background color</strong>
+                <p>
+                    What color to use for the page background.
+                </p>
+            </section>
+            <section id="accent-color-help">
+                <strong>accent color</strong>
+                <p>
+                    What color to use for the page accents.
+                    Currently, this is only used for the meter lines on the canvas.
+                </p>
+            </section>
+            <section id="add-character-help">
+                <strong>add a character</strong>
+                <p>
+                    Click to create a new subject and select the image from your device that will represent them.
+                    Selecting multiple images will create multiple subjects: one for each image.
+                    Subjects do not have to be added all at once, and the input can be reused as many times as needed.
+                </p>
+                <p>
+                    The best images to use should show the full body of the subject standing upright with a transparent background.
+                    All of these are only recommendations, the tool's functionality will not be disrupted if they are ignored,
+                    but following them will make the tool more helpful and easier to use.
                     <ul>
                         <li>
-                            <p>
-                                <strong>Left/right</strong><br/>
-                                Use the "horizontal offset" slider to move subjects around to the left or right on the canvas.
-                                The "horizontal offset" slider works in meters and has a range equal to the width of all of your subjects standing side by side.
-                            </p>
-                            <p>
-                                Changing the height of a subject may impact where they are positioned horizontally, as it will change how wide they are.
-                            </p>
+                            <strong>Full body:</strong>
+                            Images that do not display the full body may make it difficult, though not impossible, to accurately mark the top and bottom of the subject.
+                            If the top or bottom of the subject goes beyond the bounds of the image, use the
+                            <a href="#top-extension-help">top</a>/<a href="#bottom-extension-help">bottom extension input</a>s to move the markers beyond the image.
                         </li>
                         <li>
-                            <p>
-                                <strong>Front/back</strong><br/>
-                                If a subject is in front of another subject, use the "order" input to change what order they are shown in.
-                                Subjects with an "order" of 0 will be displayed on the canvas in the order (back to front) they appear on the input
-                                (which is determined by the order they were added with the "add a character" button).
-                            </p>
-                            <p>
-                                A higher "order" number will move the subject forward (in front of others), while a lower "order" number will move them backward (behind others).
-                            </p>
+                            <strong>Upright:</strong>
+                            If the subject is slouching or sitting, your measurement may not match the image
+                            and the subject may appear as though they could be taller than intended if they were to stand upright.
+                            This can be disregarded if your measurement accounts for their pose.
+                        </li>
+                        <li>
+                            <strong>Transparent:</strong>
+                            Because the canvas allows subjects to overlap, subjects without a transparent background may cover up other subjects and the meter lines behind them.
+                            You can use the <a href="#order-help">order input</a> to move opaque-background subjects behind transparent-background subjects, but the meter lines
+                            and <a href="#background-color-help">background color</a> will still be covered.
                         </li>
                     </ul>
-                    <p>
-                        Subjects cannot be moved up/down, because the entire point of this tool is to compare their height.
-                        However, I am open to discussion if you have a case that would make such a feature useful.
-                    </p>
-                </li>
-                <li>
-                    <p>
-                        <strong>Saving the chart</strong><br/>
-                        Unfortunately, there is no way to save the output at the moment.
-                        When you are finished, just zoom out (or in, or not at all) and take a screenshot.
-                    </p>
-                </li>
-            </ol>
+                </p>
+            </section>
+            <section id="top-of-measurement-help">
+                <strong>top of measurement</strong>
+                <p>
+                    The position on the subject image to use as the highest point in the height measurement.
+                    For humanoid subjects, this is typically the top of the head, excluding the hair.
+                </p>
+            </section>
+            <section id="bottom-of-measurement-help">
+                <strong>bottom of measurement</strong>
+                <p>
+                    The position on the subject image to use as the lowest point in the height measurement.
+                    For humanoid subjects, this is typically the bottom of the heel.
+                    Try to imagine where the ground would be if the subject was on the ground.
+                </p>
+            </section>
+            <section id="top-extension-help">
+                <strong>top extension</strong>
+                <p>
+                    Increases the maximum value of the <a href="#top-of-measurement-help">top</a>/<a href="#bottom-of-measurement-help">bottom of measurement input</a>s
+                    in increments of the image height in pixels.
+                </p>
+            </section>
+            <section id="bottom-extension-help">
+                <strong>bottom extension</strong>
+                <p>
+                    Lowers the minimum value of the <a href="#top-of-measurement-help">top</a>/<a href="#bottom-of-measurement-help">bottom of measurement input</a>s
+                    in increments of the image height in pixels.
+                </p>
+            </section>
+            <section id="height-input-help">
+                <strong>height (input)</strong>
+                <p>
+                    If you know the height of your subject--or at least the part in the measurement area--input
+                    it to the "height" textbox. I programmed it to be <em>quite</em> flexible, so you don't have to worry about conversions
+                    unless you have a particularly unusual unit. If you have any suggestions, please let me know.
+                    <details><summary><strong>Supported units/formats</strong></summary>
+                        The height value can include any of the following unit names or abbreviations, with or without a space between the number and the unit.
+                        Units can be mixed, such as <span class="boxed">1mi 5ft 8mm</span>. Mixed units can be separated by commas, spaces, or "and" (Oxford comma is accepted and optional). If the measurement contains feet and ends with inches, the inches unit can be optionally excluded.
+                        Example: <span class="boxed">3'6"</span> can be expressed as <span class="boxed">3'6</span>.
+                        <br>
+                        <strong>Note:</strong> units <em>are</em> case-sensitive, as there is a meaningful distinction between "mm" (millimeters; 0.001 m) and "Mm" (megameters; 1,000,000 m).
+                        <p>
+                            Imperial
+                            <ul>
+                                <li>mile(s), mi</li>
+                                <li>foot, feet, ft, '</li>
+                                <li>inch(es), in, "</li>
+                            </ul>
+                        </p>
+                        <p>
+                            Metric
+                            <ul>
+                                <li>quettameter(s), Qm</li>
+                                <li>ronnameter(s), Rm</li>
+                                <li>yottameter(s), Ym</li>
+                                <li>zettameter(s), Zm</li>
+                                <li>exameter(s), Em</li>
+                                <li>petameter(s), Pm</li>
+                                <li>terameter(s), Tm</li>
+                                <li>gigameter(s), Gm</li>
+                                <li>megameter(s), Mm</li>
+                                <li>kilometer(s), km</li>
+                                <li>hectometer(s), hm</li>
+                                <li>decameter(s), dekameter(s), dam</li>
+                                <li>meter(s), m</li>
+                                <li>decimeter(s), dm</li>
+                                <li>centimeter(s), cm</li>
+                                <li>millimeter(s), mm</li>
+                                <li>micrometer(s), μm</li>
+                                <li>nanometer(s), nm</li>
+                                <li>picometer(s), pm</li>
+                                <li>femtometer(s), fm</li>
+                                <li>attometer(s), am</li>
+                                <li>zeptometer(s), zm</li>
+                                <li>yoctometer(s), ym</li>
+                                <li>rontometer(s), rm</li>
+                                <li>quectometer(s), qm</li>
+                            </ul>
+                        </p>
+                        <p>
+                            Other
+                            <ul>
+                                <li>lightyear(s), ly</li>
+                            </ul>
+                        </p>
+                    </details>
+                </p>
+                <p>
+                    If you don't know the height of your subject, but you have another subject you <em>do</em> know the height of, and both have the same scale,
+                    (i.e. 1px in subject A = 1px in subject B; for example, both are from the same game and are screenshotted at the same level of zoom)
+                    put the unknown subject's height as "px" and make sure both subjects are in the same <a href="#pixel-group-help">pixel group</a>.
+                </p>
+            </section>
+            <section id="height-output-help">
+                <strong>height (output)</strong>
+                <p>
+                    Displays the subject's calculated height in meters.
+                    If the <a href="#height-input-help">height</a> is specified, this is a direct conversion from that.
+                    Otherwise, it is calculated using the <a href="#pixel-group-help">pixel group</a>.
+                </p>
+            </section>
+            <section id="pixel-group-help">
+                <strong>pixel group</strong>
+                <p>
+                    When the height of a subject is unknown, but has the same pixel scale as another subject with a known height, both subjects can be grouped together with this input.
+                    Subjects with an unknown height will have their height calculated using the average pixels-per-meter scale of subjects having a known height in the same pixel group.
+                </p>
+            </section>
+            <section id="left-of-measurement-help">
+                <strong>left of measurement</strong>
+                <p>
+                    Used in calculating the <a href="#width-output-help">width</a> and center of the subject.
+                </p>
+            </section>
+            <section id="right-of-measurement-help">
+                <strong>right of measurement</strong>
+                <p>
+                    Used in calculating the <a href="#width-output-help">width</a> and center of the subject.
+                </p>
+            </section>
+            <section id="width-output-help">
+                <strong>width (output)</strong>
+                <p>
+                    Uses the pixels-per-meter calculated from the <a href="#height-input-help">height</a> to calculate the width in meters between
+                    the <a href="#left-of-measurement-help">left</a> and <a href="#right-of-measurement-help">right of measurement input</a>s.
+                </p>
+            </section>
+            <section id="horizontal-offset-help">
+                <strong>horizontal offset</strong>
+                <p>
+                    Moves the subject around to the left or right on the canvas.
+                    Uses meters and has a range equal to the width of all of your subjects standing side by side.
+                </p>
+                <p>
+                    Changing the height of a subject may impact where they and others are positioned horizontally, as it will change how wide they are.
+                </p>
+            </section>
+            <section id="vertical-offset-help">
+                <strong>vertical offset</strong>
+                <p>
+                    Moves the subject up and down on the canvas, independent of the bottom of their measurement.
+                    Uses meters and has a range equal to the height of the tallest subject.
+                </p>
+            </section>
+            <section id="order-help">
+                <strong>order</strong>
+                <p>
+                    Changes the relative order subjects are shown in on the canvas.
+                    A higher order value will move the subject forward (in front of others), while a lower order value will move them backward (behind others).
+                </p>
+                <p>
+                    Subjects with an order of 0 will be displayed on the canvas in the order (back to front) they were added with the
+                    <a href="#add-character-help">add character input</a>.
+                </p>
+            </section>
+            <section id="filtering-help">
+                <strong>filtering</strong>
+                <p>
+                    Sets whether the subject image should be sampled with the browser's "auto" filtering, or "pixelated" nearest neighbor.
+                    Images with high resolution should prefer filtering, while pixel art should prefer not to be filtered.
+                </p>
+            </section>
+            <section id="remove-help">
+                <strong>remove</strong>
+                <p>
+                    Removes the subject from the page.
+                </p>
+            </section>
         </details>
         <label>
             canvas height (px)
-            <input type="number" id="scale" min="0" value="1024" step="1" />
+            <input type="number" id="scale" min="0" value="1024" step="1" aria-details="canvas-height-help" />
         </label>
         <label>
             background color
-            <input type="color" id="bg-color" />
+            <input type="color" id="bg-color" aria-details="background-color-help" />
         </label>
         <label>
             accent color
-            <input type="color" id="accent-color" />
+            <input type="color" id="accent-color" aria-details="accent-color-help" />
         </label>
         <br />
         <label>
             add a character
-            <input type="file" id="characters" accept="image/*" multiple />
+            <input type="file" id="characters" accept="image/*" multiple aria-details="add-character-help" />
         </label>
         <div id="inputs"></div>
         <div id="canvas">
@@ -727,9 +793,10 @@
             /**
              * Add a character/subject to the page, both to the inputs list and the canvas.
              * Does not call `updateCanvas()`, in case of batch adds
+             * @param filename {string}
              * @param fileURL {string}
              */
-            const addCharacter = async (fileURL) => {
+            const addCharacter = async (filename, fileURL) => {
                 try {
                     const container = document.createElement('div');
                     container.classList.add('container');
@@ -737,10 +804,12 @@
 
                     const img = document.createElement('img');
                     img.src = fileURL;
+                    img.alt = "preview: " + filename;
                     container.appendChild(img);
 
                     const cimg = document.createElement('img');
                     cimg.src = fileURL;
+                    cimg.alt = "canvas: " + filename;
                     canvas.appendChild(cimg);
 
                     // Wait for the img to load so image data is ready
@@ -771,7 +840,7 @@
                     fieldset.appendChild(fieldsetLegend);
                     const characterName = document.createElement('input');
                     characterName.type = "text";
-                    characterName.placeholder = "character name";
+                    characterName.placeholder = "character " + inputs.childElementCount;
                     fieldsetLegend.appendChild(characterName);
 
                     const heightSection = document.createElement('fieldset');
@@ -791,6 +860,7 @@
                     topSlider.max = imgHeight;
                     topSlider.value = imgHeight;
                     topSlider.classList.add('top-slider');
+                    topSlider.setAttribute('aria-details', 'top-of-measurement-help');
                     topSliderLabel.appendChild(topSlider);
 
                     const botSliderLabel = document.createElement('label');
@@ -803,6 +873,7 @@
                     botSlider.max = imgHeight;
                     botSlider.value = 0.0;
                     botSlider.classList.add('bot-slider');
+                    botSlider.setAttribute('aria-details', 'bottom-of-measurement-help');
                     botSliderLabel.appendChild(botSlider);
 
                     const topExLabel = document.createElement('label');
@@ -814,6 +885,7 @@
                     topEx.min = 0.0;
                     topEx.value = 0.0;
                     topEx.classList.add('top-ex');
+                    topEx.setAttribute('aria-details', 'top-extension-help');
                     topExLabel.appendChild(topEx);
 
                     const botExLabel = document.createElement('label');
@@ -825,6 +897,7 @@
                     botEx.min = 0.0;
                     botEx.value = 0.0;
                     botEx.classList.add('bot-ex');
+                    botEx.setAttribute('aria-details', 'bottom-extension-help');
                     botExLabel.appendChild(botEx);
 
                     const heightLabel = document.createElement('label');
@@ -835,11 +908,13 @@
                     heightInput.type = 'text';
                     heightInput.value = `5'9"`;
                     heightInput.classList.add('height-input');
+                    heightInput.setAttribute('aria-details', 'height-input-help');
                     heightLabel.appendChild(heightInput);
 
                     const heightOutput = document.createElement('output');
                     heightOutput.type = 'number';
                     heightOutput.classList.add('height-output');
+                    heightOutput.setAttribute('aria-details', 'height-output-help');
                     heightSection.appendChild(heightOutput);
 
                     const pxGroupIdName = `px-group${inputs.childElementCount - 1}`;
@@ -857,6 +932,7 @@
                         pxGroup.value = i;
                         pxGroup.name = pxGroupIdName;
                         pxGroup.classList.add('px-group');
+                        pxGroup.setAttribute('aria-details', 'pixel-group-help');
                         if (i === 0) {
                             pxGroup.checked = true;
                         }
@@ -882,6 +958,7 @@
                     leftSlider.max = imgWidth;
                     leftSlider.value = 0.0;
                     leftSlider.classList.add('left-slider');
+                    leftSlider.setAttribute('aria-details', 'left-of-measurement-help');
                     leftSliderLabel.appendChild(leftSlider);
 
                     const rightSliderLabel = document.createElement('label');
@@ -894,11 +971,13 @@
                     rightSlider.max = imgWidth;
                     rightSlider.value = imgWidth;
                     rightSlider.classList.add('right-slider');
+                    rightSlider.setAttribute('aria-details', 'right-of-measurement-help');
                     rightSliderLabel.appendChild(rightSlider);
 
                     const widthOutput = document.createElement('output');
                     widthOutput.type = 'number';
                     widthOutput.classList.add('width-output');
+                    widthOutput.setAttribute('aria-details', 'width-output-help');
                     widthSection.appendChild(widthOutput);
 
                     const positionSection = document.createElement('fieldset');
@@ -919,6 +998,7 @@
                     shiftSlider.max = 0.0;
                     shiftSlider.step = 0.0001;
                     shiftSlider.classList.add('shift-slider');
+                    shiftSlider.setAttribute('aria-details', 'horizontal-offset-help');
                     shiftSliderLabel.appendChild(shiftSlider);
 
                     const liftSliderLabel = document.createElement('label');
@@ -931,6 +1011,7 @@
                     liftSlider.value = 0.0;
                     liftSlider.step = 0.0001;
                     liftSlider.classList.add('lift-slider');
+                    liftSlider.setAttribute('aria-details', 'vertical-offset-help');
                     liftSliderLabel.appendChild(liftSlider);
 
                     const orderSliderLabel = document.createElement('label');
@@ -941,6 +1022,7 @@
                     orderSlider.type = 'number';
                     orderSlider.value = 0;
                     orderSlider.classList.add('order-slider');
+                    orderSlider.setAttribute('aria-details', 'order-help');
                     orderSliderLabel.appendChild(orderSlider);
 
                     const displaySection = document.createElement('fieldset');
@@ -958,12 +1040,14 @@
                     filteringCheckbox.type = 'checkbox';
                     filteringCheckbox.checked = imgHeight > 500;
                     filteringCheckbox.classList.add('filtering-checkbox');
+                    filteringCheckbox.setAttribute('aria-details', 'filtering-help');
                     filteringLabel.appendChild(filteringCheckbox);
 
                     const removeButton = document.createElement('button');
                     removeButton.textContent = 'remove';
                     removeButton.class = 'remover';
                     removeButton.addEventListener('click', updateCanvas);
+                    removeButton.setAttribute('aria-details', 'remove-help');
                     fieldset.appendChild(removeButton);
 
                     const updateWidthOutput = () => {
@@ -1081,7 +1165,7 @@
                     if (files === null) {
                         return;
                     }
-                    let promises = Array.from(files).map((file) => addCharacter(URL.createObjectURL(file)));
+                    let promises = Array.from(files).map((file) => addCharacter(file.name, URL.createObjectURL(file)));
                     Promise.all(promises).then(updateCanvas); // update in bulk after all `addCharacter`s have completed
                 } catch (e) {
                     console.error(e);
