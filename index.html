@@ -767,6 +767,13 @@
 
                     const fieldset = document.createElement('fieldset');
                     container.appendChild(fieldset);
+                    const fieldsetLegend = document.createElement('legend');
+                    fieldset.appendChild(fieldsetLegend);
+                    const characterName = document.createElement('input');
+                    characterName.type = "text";
+                    characterName.placeholder = "character name";
+                    fieldsetLegend.appendChild(characterName);
+
                     const heightSection = document.createElement('fieldset');
                     fieldset.appendChild(heightSection);
                     const heightLegend = document.createElement('legend');
