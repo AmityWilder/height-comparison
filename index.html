@@ -78,7 +78,7 @@
                 pointer-events: none;
                 position: relative;
                 z-index: -1;
-                border-bottom: 3px solid gray;
+                border-bottom: 3px solid color-mix(in srgb, contrast-color(var(--bg-color)) 50%, transparent);
                 img {
                     position: absolute;
                     image-rendering: pixelated;
@@ -858,17 +858,16 @@
                     pxGroupContainer.addEventListener('change', updateCanvas);
                     pxGroupLabel.appendChild(pxGroupContainer);
 
-                    const pressureSection = document.createElement('fieldset');
-                    pressureSection.classList.add('collapsed');
-                    fieldset.appendChild(pressureSection);
-                    const pressureLegend = document.createElement('legend');
-                    pressureLegend.textContent = "pressure";
-                    pressureLegend.addEventListener('click', toggleFieldsetHidden);
-                    pressureSection.appendChild(pressureLegend);
+                    const widthSection = document.createElement('fieldset');
+                    fieldset.appendChild(widthSection);
+                    const widthLegend = document.createElement('legend');
+                    widthLegend.textContent = "width";
+                    widthLegend.addEventListener('click', toggleFieldsetHidden);
+                    widthSection.appendChild(widthLegend);
 
                     const leftSliderLabel = document.createElement('label');
                     leftSliderLabel.textContent = 'left of measurement';
-                    pressureSection.appendChild(leftSliderLabel);
+                    widthSection.appendChild(leftSliderLabel);
 
                     const leftSlider = document.createElement('input');
                     leftSlider.type = 'range';
@@ -880,7 +879,7 @@
 
                     const rightSliderLabel = document.createElement('label');
                     rightSliderLabel.textContent = 'right of measurement';
-                    pressureSection.appendChild(rightSliderLabel);
+                    widthSection.appendChild(rightSliderLabel);
 
                     const rightSlider = document.createElement('input');
                     rightSlider.type = 'range';
@@ -893,22 +892,7 @@
                     const widthOutput = document.createElement('output');
                     widthOutput.type = 'number';
                     widthOutput.classList.add('width-output');
-                    pressureSection.appendChild(widthOutput);
-
-                    const massLabel = document.createElement('label');
-                    massLabel.textContent = 'mass/weight';
-                    pressureSection.appendChild(massLabel);
-
-                    const massInput = document.createElement('input');
-                    massInput.type = 'text';
-                    massInput.value = `50kg`;
-                    massInput.classList.add('mass-input');
-                    massLabel.appendChild(massInput);
-
-                    const massOutput = document.createElement('output');
-                    massOutput.type = 'number';
-                    massOutput.classList.add('mass-output');
-                    pressureSection.appendChild(massOutput);
+                    widthSection.appendChild(widthOutput);
 
                     const positionSection = document.createElement('fieldset');
                     fieldset.appendChild(positionSection);
@@ -1025,15 +1009,6 @@
                     });
                     heightInput.addEventListener('input', updateHeightOutput);
                     heightInput.addEventListener('change', updateCanvas);
-
-                    const updateMassOutput = () => {
-                        let newMass = stokg(massInput.value);
-                        if (newMass !== null) {
-                            massOutput.value = newMass;
-                        } // otherwise keep existing
-                    };
-                    updateMassOutput();
-                    massInput.addEventListener('input', updateMassOutput);
 
                     const updateFiltering = () => {
                         const rendering = filteringCheckbox.checked
