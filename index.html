@@ -344,6 +344,11 @@
             add a character
             <input type="file" id="characters" accept="image/*" multiple aria-details="add-character-help" />
         </label>
+        <label>
+            <button id="placeholders" aria-details="add-placeholder-help">
+                add a placeholder
+            </button>
+        </label>
         <div id="inputs"></div>
         <div id="canvas">
             <table id="meterstick"></table>
@@ -520,6 +525,8 @@
 
             /** @type {HTMLInputElement} */
             const characters = document.getElementById('characters');
+            /** @type {HTMLButtonElement} */
+            const placeholders = document.getElementById('placeholders');
             /** @type {HTMLInputElement} */
             const scaleInput = document.getElementById('scale');
             /** @type {HTMLInputElement} */
@@ -791,6 +798,248 @@
             });
 
             /**
+             * @param this {HTMLLegendElement}
+             * @param ev {PointerEvent}
+             */
+            const toggleFieldsetHidden = (ev) => {
+                /** @type {HTMLElement} */
+                const parent = ev.target.parentElement;
+                parent.classList.toggle('collapsed');
+            };
+
+            const addPlaceholder = async () => {
+                try {
+                    const container = document.createElement('div');
+                    container.classList.add('container');
+                    inputs.appendChild(container);
+
+                    const img = document.createElement('div');
+                    img.classList.add('placeholder');
+                    container.appendChild(img);
+
+                    const cimg = document.createElement('div');
+                    img.classList.add('placeholder');
+                    canvas.appendChild(cimg);
+
+                    const fieldset = document.createElement('fieldset');
+                    container.appendChild(fieldset);
+                    const fieldsetLegend = document.createElement('legend');
+                    fieldset.appendChild(fieldsetLegend);
+                    const characterName = document.createElement('input');
+                    characterName.type = "text";
+                    characterName.placeholder = "character " + inputs.childElementCount;
+                    fieldsetLegend.appendChild(characterName);
+
+                    const heightSection = document.createElement('fieldset');
+                    fieldset.appendChild(heightSection);
+                    const heightLegend = document.createElement('legend');
+                    heightLegend.textContent = "height";
+                    heightLegend.addEventListener('click', toggleFieldsetHidden);
+                    heightSection.appendChild(heightLegend);
+
+                    const heightLabel = document.createElement('label');
+                    heightLabel.textContent = 'height';
+                    heightSection.appendChild(heightLabel);
+
+                    const heightInput = document.createElement('input');
+                    heightInput.type = 'text';
+                    heightInput.value = `5'9"`;
+                    heightInput.classList.add('height-input');
+                    heightInput.setAttribute('aria-details', 'height-input-help');
+                    heightLabel.appendChild(heightInput);
+
+                    const heightOutput = document.createElement('output');
+                    heightOutput.type = 'number';
+                    heightOutput.classList.add('height-output');
+                    heightOutput.setAttribute('aria-details', 'height-output-help');
+                    heightSection.appendChild(heightOutput);
+
+                    const widthSection = document.createElement('fieldset');
+                    fieldset.appendChild(widthSection);
+                    const widthLegend = document.createElement('legend');
+                    widthLegend.textContent = "width";
+                    widthLegend.addEventListener('click', toggleFieldsetHidden);
+                    widthSection.appendChild(widthLegend);
+
+                    // todo: width input
+
+                    const widthOutput = document.createElement('output');
+                    widthOutput.type = 'number';
+                    widthOutput.classList.add('width-output');
+                    widthOutput.setAttribute('aria-details', 'width-output-help');
+                    widthSection.appendChild(widthOutput);
+
+                    const positionSection = document.createElement('fieldset');
+                    fieldset.appendChild(positionSection);
+                    const positionLegend = document.createElement('legend');
+                    positionLegend.textContent = "position";
+                    positionLegend.addEventListener('click', toggleFieldsetHidden);
+                    positionSection.appendChild(positionLegend);
+
+                    const shiftSliderLabel = document.createElement('label');
+                    shiftSliderLabel.textContent = 'horizontal offset';
+                    positionSection.appendChild(shiftSliderLabel);
+
+                    const shiftSlider = document.createElement('input');
+                    shiftSlider.type = 'range';
+                    shiftSlider.min = 0.0;
+                    shiftSlider.value = 0.0;
+                    shiftSlider.max = 0.0;
+                    shiftSlider.step = 0.0001;
+                    shiftSlider.classList.add('shift-slider');
+                    shiftSlider.setAttribute('aria-details', 'horizontal-offset-help');
+                    shiftSliderLabel.appendChild(shiftSlider);
+
+                    const liftSliderLabel = document.createElement('label');
+                    liftSliderLabel.textContent = 'vertical offset';
+                    positionSection.appendChild(liftSliderLabel);
+
+                    const liftSlider = document.createElement('input');
+                    liftSlider.type = 'range';
+                    liftSlider.min = 0.0;
+                    liftSlider.value = 0.0;
+                    liftSlider.step = 0.0001;
+                    liftSlider.classList.add('lift-slider');
+                    liftSlider.setAttribute('aria-details', 'vertical-offset-help');
+                    liftSliderLabel.appendChild(liftSlider);
+
+                    const orderSliderLabel = document.createElement('label');
+                    orderSliderLabel.textContent = 'order';
+                    positionSection.appendChild(orderSliderLabel);
+
+                    const orderSlider = document.createElement('input');
+                    orderSlider.type = 'number';
+                    orderSlider.value = 0;
+                    orderSlider.classList.add('order-slider');
+                    orderSlider.setAttribute('aria-details', 'order-help');
+                    orderSliderLabel.appendChild(orderSlider);
+
+                    const displaySection = document.createElement('fieldset');
+                    fieldset.appendChild(displaySection);
+                    const displayLegend = document.createElement('legend');
+                    displayLegend.textContent = "display";
+                    displayLegend.addEventListener('click', toggleFieldsetHidden);
+                    displaySection.appendChild(displayLegend);
+
+                    // todo: color/pattern input
+
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'remove';
+                    removeButton.class = 'remover';
+                    removeButton.addEventListener('click', updateCanvas);
+                    removeButton.setAttribute('aria-details', 'remove-help');
+                    fieldset.appendChild(removeButton);
+
+                    const updateWidthOutput = () => {
+                        const measureHeight = Number(topSlider.value) - Number(botSlider.value);
+                        const measureWidth = Number(rightSlider.value) - Number(leftSlider.value);
+                        widthOutput.value = measureWidth * Number(heightOutput.value) / measureHeight;
+                    };
+                    const updateHeightOutput = () => {
+                        if (heightInput.value === "px") {
+                            heightOutput.value = "?"; // unknown
+                        } else {
+                            const newHeight = stom(heightInput.value);
+                            if (newHeight !== null) {
+                                heightOutput.value = newHeight;
+                                updateWidthOutput();
+                            } // otherwise keep existing
+                        }
+                    };
+                    updateHeightOutput();
+
+                    const updateHeightIndicator = () => {
+                        const scale = img.clientHeight / imgHeight;
+                        heightIndicator.style.top = `${(imgHeight - topSlider.value) * scale}px`;
+                        heightIndicator.style.height = `${(topSlider.value - botSlider.value) * scale}px`;
+                        heightIndicator.style.left = `${(leftSlider.value) * scale}px`;
+                        heightIndicator.style.width = `${(rightSlider.value - leftSlider.value) * scale}px`;
+                    };
+                    updateHeightIndicator();
+                    botSlider.addEventListener('input', () => {
+                        topSlider.value = Math.max(Number(botSlider.value) + 1, Number(topSlider.value));
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                        updateCanvas();
+                    });
+                    topSlider.addEventListener('input', () => {
+                        botSlider.value = Math.min(Number(botSlider.value), Number(topSlider.value) - 1);
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                        updateCanvas();
+                    });
+                    leftSlider.addEventListener('input', () => {
+                        rightSlider.value = Math.max(Number(leftSlider.value) + 1, Number(rightSlider.value));
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                    });
+                    rightSlider.addEventListener('input', () => {
+                        leftSlider.value = Math.min(Number(leftSlider.value), Number(rightSlider.value) - 1);
+                        updateHeightIndicator();
+                        updateWidthOutput();
+                    });
+                    heightInput.addEventListener('input', updateHeightOutput);
+                    heightInput.addEventListener('change', updateCanvas);
+
+                    const updateFiltering = () => {
+                        const rendering = filteringCheckbox.checked
+                            ? 'auto'
+                            : 'pixelated';
+                        img.style.imageRendering = rendering;
+                        cimg.style.imageRendering = rendering;
+                    };
+                    filteringCheckbox.addEventListener('input', updateFiltering);
+                    updateFiltering();
+
+                    removeButton.addEventListener('click', () => {
+                        cimg.remove();
+                        container.remove();
+                    });
+
+                    const updateMeasurementSliderWidths = () => {
+                        try {
+                            const newWidth = (200 * (Number(topEx.value) + Number(botEx.value) + 1)) + 'px';
+                            botSlider.style.width = newWidth;
+                            topSlider.style.width = newWidth;
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    };
+                    updateMeasurementSliderWidths();
+                    botEx.addEventListener('change', () => {
+                        let newMin = imgHeight * -botEx.value;
+                        botSlider.min = newMin;
+                        topSlider.min = newMin;
+                        updateMeasurementSliderWidths();
+                        updateHeightIndicator();
+                        updateCanvas(); // min and max must be updated before refreshing the canvas
+                    });
+                    topEx.addEventListener('change', () => {
+                        let newMax = imgHeight * topEx.value + imgHeight;
+                        botSlider.max = newMax;
+                        topSlider.max = newMax;
+                        updateMeasurementSliderWidths();
+                        updateHeightIndicator();
+                        updateCanvas(); // min and max must be updated before refreshing the canvas
+                    });
+
+                    shiftSlider.addEventListener('input', () => {
+                        const shiftM = Number(shiftSlider.value);
+                        const shiftPx = shiftM * scale;
+                        cimg.style.left = shiftPx + 'px';
+                    });
+                    liftSlider.addEventListener('input', updateCanvas);
+
+                    orderSlider.addEventListener('change', () => {
+                        const order = Number(orderSlider.value);
+                        cimg.style.zIndex = order - 1;
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+
+            /**
              * Add a character/subject to the page, both to the inputs list and the canvas.
              * Does not call `updateCanvas()`, in case of batch adds
              * @param filename {string}
@@ -814,16 +1063,6 @@
 
                     // Wait for the img to load so image data is ready
                     await new Promise((resolve) => img.addEventListener('load', resolve));
-
-                    /**
-                     * @param this {HTMLLegendElement}
-                     * @param ev {PointerEvent}
-                     */
-                    const toggleFieldsetHidden = (ev) => {
-                        /** @type {HTMLElement} */
-                        const parent = ev.target.parentElement;
-                        parent.classList.toggle('collapsed');
-                    };
 
                     const heightIndicator = document.createElement('div');
                     heightIndicator.classList.add('height-indicator');
@@ -1167,6 +1406,14 @@
                     }
                     let promises = Array.from(files).map((file) => addCharacter(file.name, URL.createObjectURL(file)));
                     Promise.all(promises).then(updateCanvas); // update in bulk after all `addCharacter`s have completed
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+
+            placeholders.addEventListener('click', () => {
+                try {
+                    addPlaceholder().then(updateCanvas);
                 } catch (e) {
                     console.error(e);
                 }
