@@ -534,6 +534,7 @@
             const meterstick = document.getElementById('meterstick');
 
             const PIXEL_GROUP_COUNT = 8;
+            let nextPxGroupId = 0;
 
             bgColor.value = "#ffffff";
             bgColor.addEventListener('input', () => {
@@ -917,7 +918,7 @@
                     heightOutput.setAttribute('aria-details', 'height-output-help');
                     heightSection.appendChild(heightOutput);
 
-                    const pxGroupIdName = `px-group${inputs.childElementCount - 1}`;
+                    const pxGroupIdName = `px-group${nextPxGroupId++}`;
 
                     const pxGroupLabel = document.createElement('label');
                     pxGroupLabel.htmlFor = pxGroupIdName;
